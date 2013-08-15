@@ -88,7 +88,7 @@
         android:layout_marginTop="55dp" >
 
         <ListView
-            android:id="@+id/listView1"
+            android:id="@+id/lv"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginLeft="20dp"
@@ -98,7 +98,7 @@
         </ListView>
 
         <Button
-            android:id="@+id/btn_ant"
+            android:id="@+id/btn_prev"
             android:layout_width="20dp"
             android:layout_height="fill_parent"
             android:background="#88555555"
@@ -107,7 +107,7 @@
             android:textSize="20sp" />
 
         <Button
-            android:id="@+id/btn_sig"
+            android:id="@+id/btn_next"
             android:layout_width="20dp"
             android:layout_height="fill_parent"
             android:layout_alignParentRight="true"
