@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/RelativeLayout1"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/imageback" >
+    
+	<RelativeLayout
+	    android:id="@+id/rl_menu"
+	    android:layout_width="fill_parent"
+	    android:layout_height="50dp"
+	    android:layout_alignParentBottom="true"
+	    android:layout_centerHorizontal="true"
+	    android:background="@drawable/bottomhead"
+	    android:paddingLeft="2dp"
+	    android:paddingRight="10dp"
+	    android:paddingTop="5dp" >
+
+        <Button
+            android:id="@+id/btn_back"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="@drawable/atrasp" />
+
+        <Button
+            android:id="@+id/btn_conf"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_alignParentLeft="false"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentTop="true"
+            android:background="@drawable/settings" />
+
+        <Button
+            android:id="@+id/btn_fav"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_alignParentLeft="false"
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true"
+            android:background="@drawable/star" />
+
+    </RelativeLayout>
+    
+    <RelativeLayout
+        android:id="@+id/rl_titu"
+        android:layout_width="fill_parent"
+        android:layout_height="55dp"
+        android:layout_alignParentTop="true"
+        android:background="@drawable/tophead"
+        android:paddingTop="10dp" >
+
+            <ImageView
+                android:id="@+id/imgLogoT"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_alignParentLeft="true"
+                android:layout_marginLeft="10dp"
+                android:src="@drawable/logo" />
+
+            <com.mkiisoft.linguoo.custom.LinguooTextView
+                android:id="@+id/lbl_titu"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
+                android:layout_centerVertical="true"
+                android:text="Linguoo titulo cat/feed"
+                android:textColor="#FFFFFF"
+                android:textSize="18sp" />
+
+            <ImageView
+                android:id="@+id/prueba"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_alignParentRight="true"
+                android:layout_marginRight="10dp"
+                android:src="@drawable/search" >
+
+            </ImageView>
+
+        </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/rl_list"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@id/rl_menu"
+        android:layout_marginTop="55dp" >
+
+        <ListView
+            android:id="@+id/listView1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="20dp"
+            android:layout_marginRight="20dp"
+            android:background="#3C000000" >
+
+        </ListView>
+
+        <Button
+            android:id="@+id/btn_ant"
+            android:layout_width="20dp"
+            android:layout_height="fill_parent"
+            android:background="#88555555"
+            android:text="&lt;"
+            android:textColor="#FFFFFF"
+            android:textSize="20sp" />
+
+        <Button
+            android:id="@+id/btn_sig"
+            android:layout_width="20dp"
+            android:layout_height="fill_parent"
+            android:layout_alignParentRight="true"
+            android:background="#88555555"
+            android:text=">"
+            android:textColor="#FFFFFF"
+            android:textSize="20sp" />
+
+    </RelativeLayout>
+
+</RelativeLayout>

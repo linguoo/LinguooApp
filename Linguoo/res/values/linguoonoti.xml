@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="Noticias">
+        <item >actualidad-noti.mp3</item>
+        <item >negocios-noti.mp3</item>
+        <item >cultura-noti.mp3</item>
+        <item >deportes-noti.mp3</item>
+        <item >entretenimiento-noti.mp3</item>
+    </string-array>
+    <string-array name="Titulos">
+        <item >actualidad-noti-titulo.mp3</item>
+        <item >negocios-noti-titulo.mp3</item>
+        <item >cultura-noti-titulo.mp3</item>
+        <item >deportes-noti-titulo.mp3</item>
+        <item >entretenimiento-noti-titulo.mp3</item>
+    </string-array>
+    <string-array name="TitulosTxt">
+        <item >Obama, reforma migratoria</item>
+        <item >Córdoba, ropa para todos</item>
+        <item >Fito Páez, 400 Años UNC</item>
+        <item >Argentina goleo a guatemala</item>
+        <item >Amaral en Córdoba</item>
+    </string-array>
+    
+</resources>

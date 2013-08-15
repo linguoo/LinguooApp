@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="CatNames">
+        <item >Actualidad</item>
+        <item >Negocios</item>
+        <item >Ciencia</item>
+        <item >Cultura</item>
+        <item >Deportes</item>
+        <item >Entretenimientos</item>
+        <item >Vida</item>
+    </string-array>
+    <string-array name="rssList">
+        <item >http://clarin.feedsportal.com/c/33088/f/577681/index.rss</item>
+        <item >http://lanacion.com.ar.feedsportal.com/economia</item>
+        <item >http://lanacion.com.ar.feedsportal.com/tecnologia</item>
+        <item >http://clarin.feedsportal.com/c/33088/f/577691/index.rss</item>
+        <item >http://lanacion.com.ar.feedsportal.com/deportes</item>
+        <item >http://lanacion.com.ar.feedsportal.com/espectaculos</item>
+        <item >http://lanacion.com.ar.feedsportal.com/espectaculos</item>
+    </string-array>
+    <integer-array name="CatID">
+        <item >101</item>
+        <item >102</item>
+        <item >103</item>
+        <item >104</item>
+        <item >105</item>
+        <item >106</item>
+        <item >107</item>
+    </integer-array>
+    
+</resources>
