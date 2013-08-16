@@ -368,6 +368,7 @@
         android:textColor="#FFFFFF"
         android:textSize="20sp" />
 
+    
     <Button
         android:id="@+id/btn_next"
         android:layout_width="110dp"
