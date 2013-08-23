@@ -20,7 +20,7 @@ public class LinguooActivity extends Activity implements AccessibilityEventSourc
 	private int actualpos=-1;
 	private long dblclktime = 0;
 
-	private final String TAG = "Linguoo Main";
+	private final String TAG = "Linguoo casa";
 
 	private HumanIt humanit;
 	private Button btn_alarm;
