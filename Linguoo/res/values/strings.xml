@@ -1,8 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
+    <!-- Definición de constantes para Main Activity -->
     <string name="app_name">Linguoo</string>
-    <string name="action_settings">Settings</string>
-    <string name="hello_world">Hello world!</string>
-
+    
+        
+    <!-- Definición de constantes para Activity LinguooNewsActivity -->
+    <string name="current_news_title">Current News</string>
+    <string name="null_content_desc"></string>
 </resources>
