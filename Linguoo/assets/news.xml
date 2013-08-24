@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<news>
+    <item>
+        <id>1</id>
+        <category>1</category>
+        <title>Android y el futuro de las casas</title>
+        <content>Lleva más de 12 años en el mundo de la tecnología...</content>
+        <thumb_url>https://si0.twimg.com/profile_images/3612715676/65dbac7246187620bb61e4f825e0cf49.jpeg</thumb_url>
+        <audio_url>http://www.gruporj.com.mx/admin/Preguntas/PREG_0001.mp3</audio_url>
+    </item>
+    <item>
+        <id>2</id>
+        <category>1</category>
+        <title>Sistemas Embebidos en nuestras casas</title>
+        <content>Cada día incrementa el número de artefactos en nuestras viviendas...</content>
+        <thumb_url>https://si0.twimg.com/profile_images/3612715676/65dbac7246187620bb61e4f825e0cf49.jpeg</thumb_url>
+        <audio_url>http://www.gruporj.com.mx/admin/Preguntas/21.mp3</audio_url>
+    </item>
+    <item>
+        <id>3</id>
+        <category>1</category>
+        <title>Android y el futuro de las casas</title>
+        <content>Lleva más de 12 años en el mundo de la tecnología...</content>
+        <thumb_url>https://si0.twimg.com/profile_images/3612715676/65dbac7246187620bb61e4f825e0cf49.jpeg</thumb_url>
+        <audio_url>http://www.gruporj.com.mx/admin/Preguntas/22.mp3</audio_url>
+    </item>
+    <item>
+        <id>4</id>
+        <category>1</category>
+        <title>Sistemas Embebidos en nuestras casas</title>
+        <content>Cada día incrementa el número de artefactos en nuestras viviendas...</content>
+        <thumb_url>https://si0.twimg.com/profile_images/3612715676/65dbac7246187620bb61e4f825e0cf49.jpeg</thumb_url>
+        <audio_url>http://www.gruporj.com.mx/admin/Preguntas/23.mp3</audio_url>
+    </item>
+    <item>
+        <id>5</id>
+        <category>1</category>
+        <title>Android y el futuro de las casas</title>
+        <content>Lleva más de 12 años en el mundo de la tecnología...</content>
+        <thumb_url>https://si0.twimg.com/profile_images/3612715676/65dbac7246187620bb61e4f825e0cf49.jpeg</thumb_url>
+        <audio_url>http://www.gruporj.com.mx/admin/Preguntas/24.mp3</audio_url>
+    </item>
+    <item>
+        <id>6</id>
+        <category>1</category>
+        <title>Sistemas Embebidos en nuestras casas</title>
+        <content>Cada día incrementa el número de artefactos en nuestras viviendas...</content>
+        <thumb_url>https://si0.twimg.com/profile_images/3612715676/65dbac7246187620bb61e4f825e0cf49.jpeg</thumb_url>
+        <audio_url>http://www.gruporj.com.mx/admin/Preguntas/25.mp3</audio_url>
+    </item>
+    <item>
+        <id>7</id>
+        <category>1</category>
+        <title>Android y el futuro de las casas</title>
+        <content>Lleva más de 12 años en el mundo de la tecnología...</content>
+        <thumb_url>https://si0.twimg.com/profile_images/3612715676/65dbac7246187620bb61e4f825e0cf49.jpeg</thumb_url>
+        <audio_url>http://www.gruporj.com.mx/admin/Preguntas/26.mp3</audio_url>
+    </item>
+    <item>
+        <id>8</id>
+        <category>1</category>
+        <title>Sistemas Embebidos en nuestras casas</title>
+        <content>Cada día incrementa el número de artefactos en nuestras viviendas...</content>
+        <thumb_url>https://si0.twimg.com/profile_images/3612715676/65dbac7246187620bb61e4f825e0cf49.jpeg</thumb_url>
+        <audio_url>http://www.gruporj.com.mx/admin/Preguntas/27.mp3</audio_url>
+    </item>
+</news>
