@@ -1,6 +1,8 @@
 package com.mkiisoft.linguoo;
 
 
+import java.util.Random;
+
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -9,122 +11,233 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
-
-import com.mkiisoft.linguoo.util.Constants;
+import org.json.JSONObject;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.AlertDialog.Builder;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.text.SpannableString;
+import android.text.util.Linkify;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.webkit.WebView;
+import android.webkit.WebViewClient;
 import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
-public class LoginActivity extends Activity {
+import com.mkiisoft.linguoo.async.AsyncConnection;
+import com.mkiisoft.linguoo.async.ConnectionListener;
+import com.mkiisoft.linguoo.util.Constants;
+import com.mkiisoft.linguoo.util.KeySaver;
+
+public class LoginActivity extends Activity implements ConnectionListener{
 
 	private static final String TAG = "Linguoo Login Activity";
 	protected static final int REGISTERUSER = 90210;
+	private String page;
 	private TextView et_usu;
 	private TextView et_pass;
+	private TextView et_email;
 	private Button btn_login;
-	private Button btn_off;
 	private Button btn_reg;
-	private Button btn_conf;
-	private LoginAsync loginAsync;
+	private Button btn_recover;
+	private int state=Constants.LOGIN;
+	private int laststate;
+	private ProgressBar pb_logreg;
+	private WebView webView;
+	private ImageView imgheader;
+
 
 	@Override
-    protected void onCreate(Bundle savedInstanceState) {
-		//Log.d(TAG,"Linguoo Main");
-		
-        super.onCreate(savedInstanceState);
-        setLingouooView();
+	protected void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		setLingouooView();
 		setListeners();
-    }
-
-	private void setListeners() {
-		//Boton de Registro
-		btn_reg.setOnClickListener(new OnClickListener(){
-
-			@Override
-			public void onClick(View arg0) {
-				Intent i = new Intent(LoginActivity.this,RegisterUserActivity.class);
-				LoginActivity.this.startActivityForResult(i, REGISTERUSER);
-			}
-			
-		});
-		
-		//Boton de Login
-		btn_login.setOnClickListener(new OnClickListener(){
-
-			@Override
-			public void onClick(View arg0) {
-				
-				if ((et_usu.getText().toString().equals("")==false)&&
-						(et_pass.getText().toString().equals("")==false)){
-					String httpws = Constants.WSLOGIN;
-					httpws+=et_usu.getText().toString()+","+et_pass.getText().toString();
-					Log.d(TAG,"httpws");
-					btnstate(0);
-					loginAsync = new LoginAsync();
-					loginAsync.execute(httpws);
-				}
-			}
-			
-		});
-		btn_off.setOnClickListener(new OnClickListener(){
-
-			@Override
-			public void onClick(View arg0) {
-				finish();
-			}
-			
-		});
-		
 		
 	}
 
+	private void setListeners() {
+		btn_login.setOnClickListener(new OnClickListener(){
+
+			@Override
+			public void onClick(View v) {
+				String error="";
+				//Uso del botón loguin para ingresar a linguoo
+				if (state==Constants.LOGIN){
+					if(et_usu.getText().toString().equals("")==true){
+						error=error+"Ingrese un Nombre de Usuario o E-mail. ";
+					}
+					if(et_pass.getText().toString().equals("")==true){
+						error+="Ingrese la contraseña";
+					}
+					if (error.equals("")==false){
+						showAlertDialog(LoginActivity.this,"Linguoo",error);
+					}else{
+						//Loguear al usuario y guardar token
+						// AsyncConnection.getInstance(WS, this, Constants.LOGIN).execute();
+					}
+				}
+				//uso del botón login para cancelar el registro de nuevo usuario
+				else{
+					if (state==Constants.RECOVER){
+						btnstate(laststate);
+					}else{
+						btnstate(Constants.LOGIN);
+					}
+				}
+			}
+
+		});
+
+		btn_reg.setOnClickListener(new OnClickListener(){
+
+			@Override
+			public void onClick(View v) {
+				String error="";
+				//Uso del botón registrarse para acceder al formulario de registro
+				if (state==Constants.LOGIN){
+					btnstate(Constants.REGUSER);
+				}
+				//Uso del botón registrarse para validar el formulario y registrar al usuario
+				else if(state==Constants.RECOVER){
+					if(et_email.getText().toString().equals("")==true){
+						error+="Ingrese su cuenta de e-mail";
+					}else if(validateEmail(et_email.getText().toString())==false){
+						error+="No es un e-mail válido";
+					}
+					if (error.equals("")==false){
+						showAlertDialog(LoginActivity.this,"Linguoo",error);
+					}else{
+						//Enviar e-mail para recuperar password
+						
+						// AsyncConnection.getInstance(WS, this, Constants.RECOVER).execute();
+					}
+				}else{
+					if(et_email.getText().toString().equals("")==true){
+						error+="Ingrese su cuenta de e-mail ";
+					}else if(validateEmail(et_email.getText().toString())==false){
+						error+="No es un e-mail válido ";
+					}
+					if(et_usu.getText().toString().equals("")==true){
+						error=error+"Ingrese un Nombre de Usuario. ";
+					}
+					if(et_pass.getText().toString().equals("")==true){
+						error+="Ingrese la contraseña";
+					}
+					if (error.equals("")==false){
+						showAlertDialog(LoginActivity.this,"Linguoo",error);
+					}else{
+						//registrar al usuario y guardar token
+						page=Constants.WSREUSR+","+et_email.getText().toString()+","+
+						et_usu.getText().toString()+","+et_pass.getText().toString()+",L";
+						legalDialog();
+					}
+
+				}
+			}
+
+
+		});
+
+		btn_recover.setOnClickListener(new OnClickListener(){
+			@Override
+			public void onClick(View v) {
+				btnstate(Constants.RECOVER);
+			}
+
+
+		});
+
+
+	}
+
 	protected void btnstate(int i) {
-		if (i==0){
-			btn_login.setClickable(false);
-			btn_reg.setClickable(false);
-			btn_conf.setClickable(false);
-		}else{
-			btn_login.setClickable(true);
-			btn_reg.setClickable(true);
-			btn_conf.setClickable(true);
+		switch(i){
+		case Constants.LOGIN:
+			btn_reg.setText("Unirse");
+			btn_login.setText("Loguearse");
+			et_usu.setHint("Nombre de Usuario / E-mail");
+			et_usu.setText("");
+			et_pass.setText("");
+			et_email.setText("");
+			btn_recover.setVisibility(View.VISIBLE);
+			et_usu.setVisibility(View.VISIBLE);
+			et_pass.setVisibility(View.VISIBLE);
+			et_email.setVisibility(View.GONE);
+			state=Constants.LOGIN;
+			break;
+		case Constants.REGUSER:
+			btn_reg.setText("Registrarse");
+			et_usu.setHint("Nombre de Usuario");
+			et_email.setText("");
+			et_usu.setText("");
+			et_pass.setText("");
+			btn_login.setText("Cancelar");
+			btn_recover.setVisibility(View.VISIBLE);
+			et_email.setVisibility(View.VISIBLE);
+			et_usu.setVisibility(View.VISIBLE);
+			et_pass.setVisibility(View.VISIBLE);
+			state=Constants.REGUSER;
+			break;
+		case Constants.RECOVER:
+			btn_reg.setText("Recuperar");
+			btn_login.setText("Cancelar");
+			et_email.setText("");
+			btn_recover.setVisibility(View.GONE);
+			et_usu.setVisibility(View.GONE);
+			et_email.setVisibility(View.VISIBLE);
+			et_pass.setVisibility(View.GONE);
+			laststate=state;
+			state=Constants.RECOVER;
+			break;
+		default:
 		}
 	}
 
 	private void setLingouooView() {
-		loginAsync = new LoginAsync();
+		
 		setContentView(R.layout.login_layout);
+		imgheader = (ImageView)findViewById(R.id.imgHeader);
 		et_usu = (TextView)findViewById(R.id.et_usu);
 		et_pass = (TextView)findViewById(R.id.et_pass);
+		et_email = (TextView)findViewById(R.id.et_email);
 		btn_login = (Button)findViewById(R.id.btn_login);
-		btn_off = (Button)findViewById(R.id.btn_off);
 		btn_reg = (Button)findViewById(R.id.btn_reg);
-		btn_conf = (Button)findViewById(R.id.btn_conf);
-		
+		btn_recover = (Button)findViewById(R.id.btn_recover);
+		btnstate(Constants.LOGIN);
+		pb_logreg = (ProgressBar)findViewById(R.id.pb_logreg);
+		loadImage();
+
+
 	}
-	
-	protected void onActivityResult(int requestCode, int resultCode, Intent data){
-		if(requestCode==REGISTERUSER){
-			if (resultCode==RESULT_OK){
-				/*se guarda el UsuLog en el keystore y se da por iniciada
-				 * La sesion del usuario,
-				 * Se inicia la clase LinguooActivity.class
-				 * y luego se finaliza esta Activity
-				 */
-				Intent i = new Intent(this,LinguooActivity.class);
-				startActivity(i);
-				finish();
-			}else{
-				Log.d(TAG,"Se canceló el registro de usuario");
+
+	private boolean validateEmail(String text) {
+		boolean result = false;
+		String domain;
+		if ((text.equals("")==false)&&(text.contains("@")==true)){
+			domain = text.substring(text.indexOf("@")+1, text.length());
+			//Log.d(TAG,domain);
+			if ((domain.contains("@")==false)&&(domain.contains(".")==true)&&
+					(domain.substring(domain.indexOf(".")).length()>1)){
+				result = true;
 			}
 		}
+
+		return result;
 	}
+
+
 
 	public class LoginAsync extends AsyncTask<String,String,String>{
 
@@ -133,13 +246,13 @@ public class LoginActivity extends Activity {
 			String result=null;
 			try{
 				HttpClient httpClient = new DefaultHttpClient();
-			    HttpGet httpGet = new HttpGet(params[0]);
+				HttpGet httpGet = new HttpGet(params[0]);
 
-			    HttpResponse httpResponse = httpClient.execute(httpGet);
-			    HttpEntity httpEntity = httpResponse.getEntity();
-			    result = EntityUtils.toString(httpEntity);
-			    Log.d(TAG,result);
-			    
+				HttpResponse httpResponse = httpClient.execute(httpGet);
+				HttpEntity httpEntity = httpResponse.getEntity();
+				result = EntityUtils.toString(httpEntity);
+				Log.d(TAG,result);
+
 				JSONArray jsonArray = new JSONArray(result);
 				Log.d(TAG,"objetos: "+jsonArray.length());
 				/*for(int i=0;i<jsonArray.length();i++){
@@ -151,12 +264,156 @@ public class LoginActivity extends Activity {
 			}
 			return result;
 		}
-		
+
 		@Override
 		protected void onPostExecute (String result){
-				btnstate(1);
+			enablebtns(true);
 		}
+
+
+	}
+
+	public void showAlertDialog(Context context, String title, String message) {
+		final SpannableString s = new SpannableString(message);
+	    Linkify.addLinks(s, Linkify.ALL);
+		AlertDialog.Builder builder = new AlertDialog.Builder(context);
+		builder.setTitle(title)
+		.setIcon(R.drawable.linguoo)
+		.setMessage(s)
+		.setCancelable(false)
+		.setNegativeButton("Close",new DialogInterface.OnClickListener() {
+			public void onClick(DialogInterface dialog, int id) {
+				dialog.cancel();
+			}
+		});
 		
-		
+		AlertDialog alert = builder.create();
+		alert.show();
+	}
+
+
+	public void enablebtns(boolean i) {
+		btn_login.setClickable(i);
+		btn_reg.setClickable(i);
+		btn_recover.setClickable(i);
+		et_email.setEnabled(i);
+		et_pass.setEnabled(i);
+		et_usu.setEnabled(i);
+	}
+
+	@Override
+	public void ready(int msg, String message) {
+		pb_logreg.setVisibility(View.GONE);		
+		if (msg==Constants.REGUSER){
+			try {
+				JSONObject respuesta =new JSONObject(message);
+				if (respuesta.getInt("code")==1){
+					String usertoken = respuesta.getJSONObject("usu").getString("UsuLog");
+					KeySaver.saveShare(this,"UsuLog" ,usertoken);
+					launch(KeySaver.getIntSavedShare(this, "firsttime"));
+				}else{
+					Toast.makeText(this,"Error durante el registro, intentelo nuevamente", Toast.LENGTH_SHORT);
+				}
+				
+			} catch (JSONException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			Log.d("Login_Linguoo","Respuesta; "+message);
+		}else if(msg==Constants.LOGIN){
+			
+		}
+
+	}
+
+	@Override
+	public void cacheReady(int msg, String message) {
+	}
+
+	protected void launch(int act) {
+		Intent i = null;
+		switch(act){
+		case -1: //lanzar la configuracion de categorías una vez configurado
+			//setear la key firstime en 1
+			i= new Intent(this,LoginActivity.class);
+			break;
+		case 1:// Si se loguea por primera vez se da la opcion de configurar si no se pasa
+			//directamente a las noticias
+			i= new Intent(this,LoginActivity.class);
+			break;
+		}
+		startActivity(i);
+		finish();
+	}
+	
+	private void legalDialog() {
+		LinearLayout container = new LinearLayout(this);
+		container.setMinimumWidth(200);
+		container.setMinimumHeight(320);
+		webView = new WebView(this);
+		webView.setMinimumWidth(200);
+		webView.setMinimumHeight(380);
+		webView.getSettings().setJavaScriptEnabled(true);
+		webView.setWebViewClient(new WebViewClient());
+		webView.getSettings().setLightTouchEnabled(true);
+		webView.setFocusable(true);
+		webView.setFocusableInTouchMode(true);
+		webView.setClickable(true);
+		webView.requestFocus(View.FOCUS_DOWN);
+		webView.setOnTouchListener(new View.OnTouchListener() {
+			@Override
+			public boolean onTouch(View v, MotionEvent event) {
+				switch (event.getAction()) {
+				case MotionEvent.ACTION_DOWN:
+				case MotionEvent.ACTION_UP:
+					//Log.d("OAuth gamba", "Foco al webview");
+					if (!v.hasFocus()) {
+						v.requestFocus();
+					}
+					break;
+				}
+				return false;
+			}
+		});
+		container.addView(webView);
+		webView.loadUrl("file:///android_asset/legal.html");
+		Builder webDialog = new AlertDialog.Builder(this);
+		webDialog.setView(container).setTitle("Términos y Condiciones")
+				.setPositiveButton("Aceptar", new DialogInterface.OnClickListener() {
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+							//aceptar y registrar Usuario
+							pb_logreg.setVisibility(View.VISIBLE);
+							Log.d("Linguoo_Login",page);
+							AsyncConnection.getInstance(page, LoginActivity.this, Constants.REGUSER).execute();
+							dialog.dismiss();
+							
+						
+					}
+				}).setNegativeButton("Rechazar", new DialogInterface.OnClickListener() {
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						
+						dialog.dismiss();
+					}
+				})
+				.show();
+
+		/*
+		 * webView.setOnClickListener(new OnClickListener(){
+		 * 
+		 * @Override public void onClick(View arg0) { softKeyb(1); }
+		 * 
+		 * });
+		 */
+
+	}
+	
+	private void loadImage(){
+		Random rand = new Random();
+		int rndInt = rand.nextInt(4) + 1; // n = the number of images, that start at idx 1
+		String imgName = "img_" + rndInt;
+		int id = getResources().getIdentifier(imgName, "drawable", getPackageName());  
+		imgheader.setImageResource(id); 
 	}
 }

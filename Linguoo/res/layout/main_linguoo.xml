@@ -3,166 +3,85 @@
     android:id="@+id/RelativeLayout1"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
-    android:background="@drawable/imageback"
+    android:background="#FFFFFFFF"
     tools:context=".LinguooActivity" >
 
-    <RelativeLayout
-        android:id="@+id/rl_menu"
-        android:layout_width="wrap_content"
-        android:layout_height="50dp"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
-        android:background="@drawable/bottomhead"
-        android:paddingLeft="3dp"
-        android:paddingRight="10dp"
-        android:paddingTop="5dp" >
-
-        <Button
-            android:id="@+id/btn_off"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:background="@drawable/atrasp" />
-
-        <Button
-            android:id="@+id/btn_conf"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_alignParentLeft="false"
-            android:layout_alignParentRight="true"
-            android:layout_alignParentTop="true"
-            android:background="@drawable/settings" />
-
-        <Button
-            android:id="@+id/btn_fav"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_alignParentLeft="false"
-            android:layout_alignParentTop="true"
-            android:layout_centerHorizontal="true"
-            android:background="@drawable/star" />
-
-    </RelativeLayout>
-    
-    <RelativeLayout
-        android:id="@+id/rl_titu"
-        android:layout_width="fill_parent"
-        android:layout_height="55dp"
-        android:layout_alignParentTop="true"
-        android:background="@drawable/tophead"
-        android:paddingTop="10dp" >
-
-            <ImageView
-                android:id="@+id/imgLogoT"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:layout_alignParentLeft="true"
-                android:layout_marginLeft="10dp"
-                android:src="@drawable/logo" />
-
-            <com.mkiisoft.linguoo.custom.LinguooTextView
-                android:id="@+id/lbl_titu"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerHorizontal="true"
-                android:layout_centerVertical="true"
-                android:text="Linguoo"
-                android:textColor="#FFFFFF"
-                android:textSize="25sp" />
-
-            <ImageView
-                android:id="@+id/prueba"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:layout_alignParentRight="true"
-                android:layout_marginRight="10dp"
-                android:src="@drawable/search" >
-
-            </ImageView>
-
-        </RelativeLayout>
-
-    <RelativeLayout
-        android:id="@+id/rl_alarm"
-        android:layout_width="fill_parent"
-        android:layout_height="100dp"
-        android:layout_marginTop="55dp"
-        android:background="#4B000000" >
-
-        <DigitalClock
-            android:id="@+id/digitalClock1"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerHorizontal="true"
-            android:layout_centerVertical="true"
-            android:shadowColor="#90000000"
-            android:shadowDx="2"
-            android:shadowDy="2"
-            android:shadowRadius="8"
-            android:text="DigitalClock"
-            android:textColor="#FFFFFF"
-            android:textSize="30sp" />
-
-        <Button
-            android:id="@+id/btn_alarm"
-            style="?android:attr/buttonStyleSmall"
-            android:layout_width="32dp"
-            android:layout_height="32dp"
-            android:layout_alignParentRight="true"
-            android:layout_alignParentTop="true"
-            android:layout_marginRight="7dp"
-            android:layout_marginTop="5dp"
-            android:background="@drawable/clock" />
-
-    </RelativeLayout>
-
     <LinearLayout
-        android:id="@+id/ll_opc"
+        android:id="@+id/layout_header"
         android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
-        android:layout_above="@id/rl_menu"
-        android:layout_below="@id/rl_alarm"
-        android:layout_marginBottom="10dp"
+        android:layout_height="200dp"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:background="#FF808080"
         android:orientation="vertical" >
 
-        <com.mkiisoft.linguoo.custom.LinguooButton
-            android:id="@+id/btn_lin_not"
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent"
-            android:layout_weight="1"
-            android:background="@drawable/azul"
-            android:text="Linguoo Noticias"
-            android:textColor="#FFFFFF"
-            android:textSize="30sp" />
+        <ImageView
+            android:id="@+id/imgHeader"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:scaleType="centerCrop"
+            android:src="@drawable/img_1" />
+    </LinearLayout>
 
-        <com.mkiisoft.linguoo.custom.LinguooButton
-            android:id="@+id/btn_rss_not"
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent"
-            android:layout_weight="1"
-            android:background="@drawable/naranja"
-            android:text="Rss Noticias"
-            android:textColor="#FFFFFF"
-            android:textSize="30sp" />
+    <LinearLayout
+        android:id="@+id/linearLayout1"
+        android:layout_width="fill_parent"
+        android:layout_height="150dp"
+        android:layout_below="@+id/layout_header"
+        android:layout_centerHorizontal="true"
+        android:gravity="center"
+        android:orientation="vertical" >
 
-        <com.mkiisoft.linguoo.custom.LinguooButton
-            android:id="@+id/btn_lib"
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent"
-            android:layout_weight="1"
-            android:background="@drawable/green"
-            android:text="Libros"
-            android:textColor="#FFFFFF"
-            android:textSize="30sp" />
+        <TextView
+            android:id="@+id/textView1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Bienvenido a"
+            android:textColor="#FF00aaaa"
+            android:textSize="20sp" />
 
-        <com.mkiisoft.linguoo.custom.LinguooButton
-            android:id="@+id/btn_blog"
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent"
-            android:layout_weight="1"
-            android:background="@drawable/gris"
-            android:text="Blogs"
-            android:textColor="#FFFFFF"
-            android:textSize="30sp" />
+        <ImageView
+            android:id="@+id/imageView1"
+            android:layout_width="wrap_content"
+            android:layout_height="75dp"
+            android:src="@drawable/logo" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/linearLayout2"
+        android:layout_width="match_parent"
+        android:layout_height="100dp"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@+id/linearLayout1"
+        android:gravity="center"
+        android:orientation="vertical" >
+
+        <Button
+            android:id="@+id/btn_logreg"
+            android:layout_width="130dp"
+            android:layout_height="40dp"
+            android:layout_marginBottom="10dp"
+            android:background="@drawable/button"
+            android:text="Ingresar"
+            android:textSize="14sp" />
+
+        <Button
+            android:id="@+id/btn_testver"
+            android:layout_width="130dp"
+            android:layout_height="40dp"
+            android:layout_marginTop="10dp"
+            android:background="@drawable/button"
+            android:text="Probar"
+            android:textSize="14sp" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_below="@+id/linearLayout2"
+        android:layout_centerHorizontal="true"
+        android:background="@drawable/main_gradient"
+        android:orientation="vertical" >
 
     </LinearLayout>
 

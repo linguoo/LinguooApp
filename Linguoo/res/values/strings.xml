@@ -1,8 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
+	<string name="codename">Absinthe</string>
     <string name="app_name">Linguoo</string>
     <string name="action_settings">Settings</string>
     <string name="hello_world">Hello world!</string>
-
+    <string name="eula_title">Terminos y Condiciones</string>
+    <string name="accept">Aceptar</string>
+    <string name="decline">Declinar</string>
+    <string name="eula_text">Hola, y bienvenido a nuestros Términos y Condiciones de Uso. Son importantes y afectan a tus derechos, por lo que te rogamos que los leas detenidamente junto con nuestra Política de Privacidad. Esperamos que te encuentres cómodamente sentado. Vamos allá… </string>
+    
+    
 </resources>

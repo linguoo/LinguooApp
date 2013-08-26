@@ -26,7 +26,9 @@ public class HumanIt {
 			mp=null;
 		}
 	}
-
+	
+	
+	
 	public void sayIt(String url){
 		AssetFileDescriptor uri = null;
         this.destroyMp();
@@ -53,6 +55,8 @@ public class HumanIt {
 		}
 		
 	}
+	
+	
 	
 	public void sayIt(int btn) {
 		AssetFileDescriptor uri = null;

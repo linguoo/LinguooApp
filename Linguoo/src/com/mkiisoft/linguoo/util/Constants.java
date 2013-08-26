@@ -40,8 +40,16 @@ public class Constants {
 	public static final int CAT_VID = 7;
 			
 	public static final String WSLOGIN = "http://ec2-54-232-205-219.sa-east-1.compute.amazonaws.com/linguoo/alogusersc.aspx?";
+	
 	public static final String WSREUSR = "http://ec2-54-232-205-219.sa-east-1.compute.amazonaws.com/linguoo/areguseer.aspx?";
 	public static final String WSGETCAT = "http://ec2-54-232-205-219.sa-east-1.compute.amazonaws.com/linguoo/adevcategorias.aspx";
 	public static final String WSFEED = "";
 	public static final String WSNOTI = "";
+
+	public static final int TESTVER = 9001;
+	public static final int LOGREG = 9002;
+	public static final int LOGIN = 1;
+	public static final int REGUSER = 2;
+	public static final int RECOVER = 3;
+	
 }
