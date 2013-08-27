@@ -7,6 +7,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.Checkable;
+import android.widget.FrameLayout;
 import android.widget.TextView;
 
 public class CustomCatAdapter extends ArrayAdapter<String>  {
@@ -27,6 +29,7 @@ public class CustomCatAdapter extends ArrayAdapter<String>  {
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {
 		View vi = convertView;
+		
 	    ViewHolder viewHolder=null;
 	    if (vi == null) {
 	    	//Log.d("CustomAdapter","convertview is null");
@@ -34,7 +37,7 @@ public class CustomCatAdapter extends ArrayAdapter<String>  {
 	    	vi = li.inflate(layoutResourceid, null);
 	    	
 	        viewHolder = new ViewHolder();
-	        viewHolder.txtCategoria = (TextView) vi.findViewById(R.id.txtCategorias);
+	        //viewHolder.txtCategoria = (TextView) vi.findViewById(R.id.txtCategorias);
 	        vi.setTag(viewHolder);
 	    }else{
 	    	viewHolder = (ViewHolder) vi.getTag();
@@ -49,6 +52,6 @@ public class CustomCatAdapter extends ArrayAdapter<String>  {
 	    protected TextView txtCategoria;
 	}
 
-
+	
 
 }
