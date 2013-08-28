@@ -1,11 +1,18 @@
 package com.mkiisoft.linguoo;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.util.ArrayList;
 
 import org.json.JSONArray;
+import org.json.JSONObject;
 
 import com.mkiisoft.linguoo.async.Commons;
+import com.mkiisoft.linguoo.async.ConnectionListener;
+import com.mkiisoft.linguoo.util.KeySaver;
 
 import android.R.bool;
 import android.app.Activity;
@@ -29,19 +36,20 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class GridActivity extends Activity {
-
+public class GridActivity extends Activity implements ConnectionListener{
+	
 	@Override
 	public void onConfigurationChanged(Configuration newConfig) {
 		// TODO Auto-generated method stub
 		super.onConfigurationChanged(newConfig);
 	}
-	private String comons;
-	GridView gv;
-	String[] catSelected;
-	int c=0;
-	boolean[] arraySelection;
-	ArrayList<ItemImage> arrayCategoria;
+	
+	private GridView gv;
+	private String usuLog="";
+	private int firstTime=0;
+	private ImageView img_back;
+	private ArrayList<ItemImage> arrayCategoria;
+	private int lastPosition=0;
 	
 	ImageAdapterGrid ia;
 	//boolean[] arraySelection;
@@ -50,109 +58,172 @@ public class GridActivity extends Activity {
 		// TODO Auto-generated method stub
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.catchioce_layout);
-		
+		usuLog= KeySaver.getStringSavedShare(this, "UsuLog");
+		firstTime=KeySaver.getIntSavedShare(this, "FirstTime");
 		gv= (GridView) findViewById(R.id.gird_cat);
-		ia= new ImageAdapterGrid(this, arrayCategoria, R.layout.cat_item_grid);
-		gv.setAdapter(ia);
-		refreshGrid();
+		img_back=(ImageView) this.findViewById(R.id.btn_back_grid);
 		
-		try {
+		try {	
+			InputStream is= getAssets().open("jsoncat.txt");
+			InputStreamReader reader= new InputStreamReader(is, "UTF-8");
+			String res=getStringFromInputStream(reader);
+			//comons=Commons.readFileAsString(res);
+			arrayCategoria=new ArrayList<ItemImage>();
+			JSONArray jsArrayCat= new JSONArray(res);
 			
-			comons=Commons.readFileAsString("file:///android_asset/jsoncat.txt");
-			JSONArray jsArrayCat= new JSONArray(comons);
-			
+			for(int i=0; i<jsArrayCat.length(); i++)
+			{
+				JSONObject obj= (JSONObject) jsArrayCat.get(i);
+				ItemImage item=new ItemImage(selectImaginItem(obj.getInt("cat_id")), obj.getBoolean("cat_sel"), obj.getString("cat_name"), obj.getInt("cat_id"));
+				Log.v("item", selectImaginItem(obj.getInt("cat_id")) +""+ obj.getBoolean("cat_sel")+""+ obj.getString("cat_name"));
+				arrayCategoria.add(item);
+				
+			}
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		
+		/* Hay que setear la imagen del boton back segun si es firs time o no*/
 		
+		if(checkearSeleccion()==true)
+		{
+			img_back.setVisibility(View.VISIBLE);
+		}
+		else{
+			img_back.setVisibility(View.INVISIBLE);
+		}
 		
+		ia= new ImageAdapterGrid(this, arrayCategoria, R.layout.cat_item_grid);
+		gv.setAdapter(ia);
+		refreshGrid();
 		
-		final int size= gv.getCount();
-		catSelected=new String[size];
-		
-		/*gv.setOnItemClickListener(new OnItemClickListener() {
+		gv.setOnItemClickListener(new OnItemClickListener() {
 
 			@Override
 			public void onItemClick(AdapterView<?> arg0, View arg1, int arg2,
 					long arg3) {
-				arg1.setSelected(true);
 				
-				int itemSize= itemChild.getChildCount();
-				
-				
-				
-				
-				
-				for(int j=0; j<itemSize; j++)
+				lastPosition= arg2;
+				if(arrayCategoria.get(arg2).getImageSelected()==true)
 				{
+					arrayCategoria.get(arg2).setImageSelected(false);
 					
-					if(itemChild.getChildAt(j) instanceof TextView)
+				}
+				else
+				{
+					arrayCategoria.get(arg2).setImageSelected(true);
+				}
+				if(checkearSeleccion()==true)
+				{
+					img_back.setVisibility(View.VISIBLE);
+				}
+				else{
+					img_back.setVisibility(View.INVISIBLE);
+				}
+				refreshGrid();
+			}
+		});
+				
+		
+		img_back.setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				/*llamar al web service en el asynctask*/
+				String categorias="";
+				for(int i=0; i<arrayCategoria.size(); i++)
+				{
+					if(arrayCategoria.get(i).getImageSelected()==true)
 					{
-						Log.v("asda", ""+itemSize);
-						TextView text= (TextView)itemChild.getChildAt(j);
-						String categoria= (String) text.getText();
-						if(probarSeleccion(categoria))
-						{
-							catSelected[c]=categoria;
-							c++;
-						}else
-						{
-							for(int i=0; i<catSelected.length; i++)
-							{
-								if(catSelected[i].toString().equals(categoria))
-								{
-									
-								}
-							}
-						}
-						
-						
-						Log.v("array", catSelected[c]);
+						categorias+=","+arrayCategoria.get(i).getId();
 						
 					}
 				}
-				
-			}
-		});*/
-		ImageView back_immage= (ImageView) findViewById(R.id.btn_back_grid);
-		back_immage.setOnClickListener(new OnClickListener() {
-			
-			@Override
-			public void onClick(View arg0) {
-				
-				
-				
+				Log.v("categorias", categorias);
 			}
 		});
 		
+	}
+	
+	public static String getStringFromInputStream(InputStreamReader is)
+	{
+		BufferedReader reader=new BufferedReader(is);
+		StringBuilder sb=new StringBuilder();
+		String Line=null;
 		
-		
+		try{
+			while((Line=reader.readLine()) != null)
+			{
+				sb.append(Line + "\n");
+			}
+			is.close();
+		}catch(IOException e)
+		{
+			e.printStackTrace();
+		}
+		return sb.toString();
 	}
 	
 	private void refreshGrid(){
 		//setBotones();
 		if(gv.getAdapter()!=null){
-		gv.invalidateViews();}
+		//gv.invalidateViews();}
+		}
 		//reloadAdapter();
 		//mAdapter.notifyDataSetChanged();
 		gv.setAdapter(ia);
+		gv.setSelection(lastPosition);
 		
 		ia.notifyDataSetChanged();
 	}
 	
-	public boolean probarSeleccion(String cat)
+	public int selectImaginItem(int id)
 	{
-		for(int i=0; i<catSelected.length; i++)
-		{
-			if(catSelected[i].toString().equals(cat))
-			{
-				return false;
-			}
+		switch(id){
+		case 1:
+			return R.drawable.cultura_256;
+		case 2:
+			return R.drawable.actualidad_256;
+		case 3:
+			return R.drawable.deportes_256;
+		case 4:
+			return R.drawable.negocios_256;
+		case 5:
+			return R.drawable.entretenimientos_128;
+		case 6:
+			return R.drawable.ciencia_256;
+		default:
+			return R.drawable.vida_256;
+			
 		}
-		return true;
+		
+		
 	}
+	public boolean checkearSeleccion()
+	{
+		boolean selectedCat=false;
+		for( ItemImage i: arrayCategoria)
+		{
+			selectedCat= selectedCat || i.getImageSelected();
+		}
+		return selectedCat;
+	}
+
+	@Override
+	public void ready(int msg, String message) {
+		
+		
+		
+	}
+
+	@Override
+	public void cacheReady(int msg, String message) {
+		// TODO Auto-generated method stub
+		
+	}
+	
+	
 	
 	
 	

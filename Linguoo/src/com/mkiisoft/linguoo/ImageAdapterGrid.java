@@ -57,7 +57,7 @@ public class ImageAdapterGrid extends BaseAdapter {
 	public int getCount() {
 		
 		
-		return categorias.length;
+		return arrayCat.size();
 		
 	}
 
@@ -76,7 +76,7 @@ public class ImageAdapterGrid extends BaseAdapter {
 	@Override
 	public View getView(int position, View arg1, ViewGroup arg2) {
 		//
-		final ViewHolder holder=null;
+		ViewHolder holder=null;
 		
 		if(arg1==null)
 		{
@@ -96,6 +96,7 @@ public class ImageAdapterGrid extends BaseAdapter {
 		
 		holder.t.setText(arrayCat.get(position).getTextCategoria());
 		holder.iv.setBackgroundResource(arrayCat.get(position).getImageView());
+		
 		if(arrayCat.get(position).getImageSelected()==true)
 		{
 			holder.chk.setBackgroundResource(R.drawable.cat_select);

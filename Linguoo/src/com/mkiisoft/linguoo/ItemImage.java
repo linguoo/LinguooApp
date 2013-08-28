@@ -3,6 +3,14 @@ package com.mkiisoft.linguoo;
 import android.R.drawable;
 
 public class ItemImage {
+	public int getId() {
+		return id;
+	}
+
+	public void setId(int id) {
+		this.id = id;
+	}
+
 	public int getImageView() {
 		return imageView;
 	}
@@ -31,12 +39,14 @@ public class ItemImage {
 	private int imageView;
 	private boolean imageSelected;
 	private String textCategoria;
+	private int id;
 	
-	public ItemImage(int imageView, boolean imageSelected, String textCategoria) {
+	public ItemImage(int imageView, boolean imageSelected, String textCategoria, int id) {
 		
 		this.imageView = imageView;
 		this.imageSelected = imageSelected;
 		this.textCategoria = textCategoria;
+		this.id=id;
 	}
 	
 	
