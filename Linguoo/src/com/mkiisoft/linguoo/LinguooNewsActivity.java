@@ -1,51 +1,63 @@
 package com.mkiisoft.linguoo;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
+import org.json.JSONArray;
+import org.json.JSONException;
 import android.app.Activity;
 import android.content.res.Configuration;
 import android.os.Bundle;
-import android.view.accessibility.AccessibilityEvent;
-import android.view.accessibility.AccessibilityEventSource;
+import android.util.Log;
+import android.widget.Button;
+import android.widget.FrameLayout;
 import android.widget.ListView;
+import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
+import android.widget.ToggleButton;
 import android.view.View;
 import android.view.View.OnClickListener;
 import com.mkiisoft.linguoo.CustomNewsAdapter.newsHolder;
+import com.mkiisoft.linguoo.async.AsyncConnection;
+import com.mkiisoft.linguoo.async.ConnectionListener;
+import com.mkiisoft.linguoo.util.Constants;
+import com.mkiisoft.linguoo.util.Dialogs;
+import com.mkiisoft.linguoo.util.KeySaver;
 
-public class LinguooNewsActivity extends Activity implements AccessibilityEventSource {
+public class LinguooNewsActivity extends Activity implements ConnectionListener {
 	protected static final String TAG = "Linguoo Noticias";
-	static final String KEY_NEWS = "item"; 
-	static final String KEY_CATEGORY = "category";
-	static final String KEY_ID = "id";
-	static final String KEY_TITLE = "title";
-	static final String KEY_CONTENT = "content";
-	static final String KEY_THUMB = "thumb_url";
-	static final String KEY_AUDIO = "audio_url";
+		
+	private RelativeLayout newsFooterLayout;
+	private FrameLayout newsContentLayout;
+	private ListView newsList;
+	private ProgressBar mainLoader;
 	
-	CustomNewsAdapter adapter;
-	ListView newsList;
-	btnAddClick btnAdd;
-	itemClick itemPlay;
-	newsHolder nHolder;
+	private String page;	
+	private CustomNewsAdapter adapter;
+	private btnAddClick btnAdd;
+	private itemClick itemPlay;
+	private newsHolder nHolder;
+	private ArrayList<HashMap<String, String>> arrayNewsList;
+	private LinguooPlayList playList;
+	private LinguooMediaPlayer player;
+	private Button btnAddCategory; 
+	private Button btnNextNews;
+	private ToggleButton btnPlayPause;
+	private ProgressBar progressbar;
+	
 	
 	@Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setMainView();
-        launchNews();        
+        initializeLists();
+        initializePlayer();
+        loadNews();        
+        addListeners();
 	}
 	
 	@Override
@@ -60,129 +72,317 @@ public class LinguooNewsActivity extends Activity implements AccessibilityEventS
 	
 	@Override
 	public void onStart(){
-		super.onStart();
-	}
-	
-	@Override
-	public void sendAccessibilityEvent(int arg0) {
-			
+		super.onStart();		
 	}
 
 	@Override
-	public void sendAccessibilityEventUnchecked(AccessibilityEvent arg0) {
-		
-	}
-	
-	/*  *********************************************************************************************** */
-	
-	private void setMainView() {
-		setContentView(R.layout.news_layout);
-		newsList = (ListView) this.findViewById(R.id.lstNews);
-	}
-	
-	private void launchNews(){
+	public void ready(int msg, String message) {
+		// TODO Auto-generated method stub
+		JSONArray newsData = null;
 		try {
-			InputStream is = getAssets().open("news.xml");
-			DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-			try {
-				DocumentBuilder db = dbf.newDocumentBuilder();
-				try {
-					Document doc = db.parse(new InputSource(is));
-					doc.getDocumentElement().normalize();
-		            NodeList nodeList = doc.getElementsByTagName(KEY_NEWS);
-		            populateList(nodeList);
-		            
-				} catch (SAXException e) {
-					e.printStackTrace();
-				}
-			} catch (ParserConfigurationException e) {
-				e.printStackTrace();
+			switch(msg){
+				case Constants.NEWS:
+					newsData = new JSONArray(message);
+					populateNewsList(newsData);
+					break;
+				case 500:
+					Dialogs.showAlertDialog(LinguooNewsActivity.this, "Conexión", "Se produjo un error al intenet recuperar las noticias. Error: " + msg, "Cerrar");
+					break;
 			}
-		} catch (IOException e) {
+				
+		}catch (JSONException e) {
+			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+			
+		hideLoading();
+	}
+
+	@Override
+	public void cacheReady(int msg, String message) {
+		// TODO Auto-generated method stub
+		
 	}
 	
-	private void populateList(NodeList nodeList){
 		
-		ArrayList<HashMap<String, String>> arrayNewsList = new ArrayList<HashMap<String, String>>();
-		
-		for (int i = 0; i < nodeList.getLength(); i++){
-			HashMap<String, String> curNews = new HashMap<String, String>();			
-			
-			Node node = nodeList.item(i);
-			
-			Element curEl = (Element) node;
-            NodeList nl = curEl.getElementsByTagName(KEY_ID);
-            Element idElement = (Element) nl.item(0);
-            nl = idElement.getChildNodes();
-            curNews.put(KEY_ID, ((Node) nl.item(0)).getNodeValue());
-            
-            curEl = (Element) node;
-            nl = curEl.getElementsByTagName(KEY_CATEGORY);
-            idElement = (Element) nl.item(0);
-            nl = idElement.getChildNodes();
-            curNews.put(KEY_CATEGORY, ((Node) nl.item(0)).getNodeValue());
-            
-            curEl = (Element) node;
-            nl = curEl.getElementsByTagName(KEY_TITLE);
-            idElement = (Element) nl.item(0);
-            nl = idElement.getChildNodes();
-            curNews.put(KEY_TITLE, ((Node) nl.item(0)).getNodeValue());
-            
-            curEl = (Element) node;
-            nl = curEl.getElementsByTagName(KEY_CONTENT);
-            idElement = (Element) nl.item(0);
-            nl = idElement.getChildNodes();
-            curNews.put(KEY_CONTENT, ((Node) nl.item(0)).getNodeValue());
-            
-            curEl = (Element) node;
-            nl = curEl.getElementsByTagName(KEY_THUMB);
-            idElement = (Element) nl.item(0);
-            nl = idElement.getChildNodes();
-            curNews.put(KEY_THUMB, ((Node) nl.item(0)).getNodeValue());
-            
-            curEl = (Element) node;
-            nl = curEl.getElementsByTagName(KEY_AUDIO);
-            idElement = (Element) nl.item(0);
-            nl = idElement.getChildNodes();
-            curNews.put(KEY_AUDIO, ((Node) nl.item(0)).getNodeValue());
-
-            arrayNewsList.add(curNews);
-		}
+	/*  *********************************************************************************************** */
 	
+	private void configureView(int visibility){
+		switch(visibility){
+			case Constants.NEWS_INVISIBLE:
+				newsFooterLayout.setVisibility(RelativeLayout.INVISIBLE);
+				newsContentLayout.setVisibility(FrameLayout.INVISIBLE);
+				newsList.setVisibility(ListView.INVISIBLE);
+				mainLoader.setVisibility(ProgressBar.INVISIBLE);
+				break;
+			case Constants.NEWS_VISIBLE:
+				newsFooterLayout.setVisibility(RelativeLayout.VISIBLE);
+				newsContentLayout.setVisibility(FrameLayout.VISIBLE);
+				newsList.setVisibility(ListView.VISIBLE);
+				mainLoader.setVisibility(ProgressBar.VISIBLE);
+				break;
+		}
+			
+	}
+		
+	private void setMainView(){
+		setContentView(R.layout.news_layout);
+		newsFooterLayout = (RelativeLayout) this.findViewById(R.id.newsFooterLayout);
+		newsContentLayout = (FrameLayout) this.findViewById(R.id.newsContentLayout);
+		newsList = (ListView) this.findViewById(R.id.lstNews);
+		mainLoader = (ProgressBar) this.findViewById(R.id.mainLoader);
+		btnAddCategory = (Button)this.findViewById(R.id.btnAddCategory);
+		btnPlayPause = (ToggleButton)this.findViewById(R.id.btnPlayPause);
+		btnNextNews = (Button)this.findViewById(R.id.btnFF);
+		progressbar = (ProgressBar) this.findViewById(R.id.progressbar);
+		configureView(Constants.NEWS_INVISIBLE); 
+	}
+	
+	private void initializeLists(){
+		arrayNewsList = new ArrayList<HashMap<String, String>>();
+		playList = new LinguooPlayList();
+	}
+	
+	private void initializePlayer(){
+		PlayerCallback playerCallback = new PlayerCallback();
+		player = new LinguooMediaPlayer(this, playerCallback);
+	}
+	
+	private void loadNews(){
+		Log.d(TAG,"Recuperando noticias...");
+		showLoading();
+		page = Constants.WSGETNEWS;
+		AsyncConnection.getInstance(page, LinguooNewsActivity.this, Constants.NEWS).execute();
+	}
+	
+	@SuppressWarnings("unused")
+	private String getLocalStoredNews(){
+		HashMap<String, String> localKeys; 
+		ArrayList<HashMap<String, String>> localNews = new ArrayList<HashMap<String, String>>();
+		Map<String,?> store = null;
+		Integer total_news = 0;
+		
+		total_news = KeySaver.getIntSavedShare(LinguooNewsActivity.this, "total_news");
+		store = KeySaver.getAll(LinguooNewsActivity.this);
+		Object[] storeKeyArray;
+		Object[] storeValueArray;
+		
+		storeKeyArray = store.keySet().toArray();
+		
+		for(int i = 0; i < total_news; i++){
+			localKeys = new HashMap<String, String>();
+			for(int b = 0; b < storeKeyArray.length; b++){
+				String patternStr = KeySaver.getPrefix() + Constants.NEWS_KEY_PREFIX + "_" + i + "_";
+				Pattern pattern = Pattern.compile(patternStr);
+				Matcher matcher = pattern.matcher(storeKeyArray[b].toString());
+				while(matcher.find()){
+					storeValueArray =  store.values().toArray();
+					String key = storeKeyArray[b].toString().substring(patternStr.length(), storeKeyArray[b].toString().length());
+					String value = storeValueArray[b].toString();
+					localKeys.put(key,value);
+				}
+			}
+			localNews.add(localKeys);
+			
+		}		
+		return localNews.toString();
+	}	
+	
+	private void populateNewsList(JSONArray newsData) throws JSONException{
+		Log.d(TAG,"Cargando noticias...");
+		
+		configureView(Constants.NEWS_VISIBLE);
+		for(int i = 0; i < newsData.length(); i++){
+			HashMap<String, String> curNews = new HashMap<String, String>();
+			for(int b = 0; b < newsData.getJSONObject(i).length(); b++){
+				String key = newsData.getJSONObject(i).names().optString(b);
+				String value = newsData.getJSONObject(i).getString(newsData.getJSONObject(i).names().optString(b));
+				curNews.put(key,value);
+			}
+			curNews.put(Constants.NEWS_ONPLAYLIST, "false");
+			registerNews(curNews,i,newsData.length());
+		}
+		launchNews();
+	}
+	
+	private void registerNews(HashMap<String, String> curNews, Integer index, Integer total){
+		Iterator<String> iNews = curNews.keySet().iterator();
+
+		arrayNewsList.add(curNews);
+	    
+        while(iNews.hasNext()){
+        	String key = (String)iNews.next();
+        	String value = (String)curNews.get(key);
+        	
+        	key = Constants.NEWS_KEY_PREFIX  + "_" + index + "_" + key;
+        	KeySaver.saveShare(LinguooNewsActivity.this, key, value);
+        }
+
+        KeySaver.saveShare(LinguooNewsActivity.this, "total_news", total);
+    }
+
+	private void launchNews(){
 		btnAdd = new btnAddClick();
 		itemPlay = new itemClick();
 		adapter = new CustomNewsAdapter(this, R.layout.news_item_layout, arrayNewsList, itemPlay, btnAdd);        
 		newsList.setAdapter(adapter);
+		updateAdapter();
+	}
+
+	private void updateArrayNewsList(Integer index, Boolean addRemoveFlag){
+		HashMap<String, String> curNews;
+		
+		curNews = arrayNewsList.get(index);
+		curNews.put(Constants.NEWS_ONPLAYLIST, addRemoveFlag.toString());
+		
+		arrayNewsList.set(index, curNews);
+		
+		if(addRemoveFlag){
+			playList.add(curNews);
+		}else{
+			playList.remove(curNews);
+		}
 	}
 	
-	
+	private void updateAdapter(){
+		adapter.notifyDataSetChanged();
+	}
+		
 	private void playNews(View v){
 		nHolder = (newsHolder)v.getTag();
-		
+		player.play(nHolder.getAudioURL());	
 	}
 	
-	private void addNews(View v){
-		nHolder = (newsHolder)v.getTag();
-		
+	private void addRemoveNews(View v){
+		View vParent = (View) v.getParent();
+		ToggleButton btnAdd = (ToggleButton)v;
+		nHolder = (newsHolder)vParent.getTag();
+				
+		if(btnAdd.isChecked()){
+			updateArrayNewsList(nHolder.getItemPosition(), true);
+			btnAdd.setBackgroundResource(R.drawable.btn_add_off);
+		}else{
+			updateArrayNewsList(nHolder.getItemPosition(), false);
+			btnAdd.setBackgroundResource(R.drawable.btn_add_on);
+		}
+		updateAdapter();
 	}
 	
+	private void showLoading(){
+		mainLoader.setVisibility(ProgressBar.VISIBLE);
+	}
+	
+	private void hideLoading(){
+		mainLoader.setVisibility(ProgressBar.INVISIBLE);
+	}
+	
+	/*  *********************************************************************************************** */
+
+	private void addListeners(){
+		btnAddCategory.setOnClickListener(new OnClickListener(){
+			@Override
+			public void onClick(View arg0) {
+				Dialogs.showAlertDialog(LinguooNewsActivity.this, "Activity Categorías", "Activity Categorías...", "Cerrar");
+			}			
+		});
+		
+		btnPlayPause.setOnClickListener(new OnClickListener(){
+			@Override
+			public void onClick(View v) {
+				// TODO Auto-generated method stub
+				ToggleButton btnPP = (ToggleButton)v;
+				if(playList.getTotal() > 0){					
+					if(btnPP.isChecked()){
+						btnPP.setBackgroundResource(R.drawable.btn_pause);
+						String url = playList.getCurrentTrackURL();
+						playList.setRepeatModeOn();
+						player.play(url);
+						playList.moveForward();
+					}else{
+						btnPP.setBackgroundResource(R.drawable.btn_play);
+						player.pause();
+					}
+				}
+			}
+		});
+		
+		btnNextNews.setOnClickListener(new OnClickListener(){
+			@Override
+			public void onClick(View v) {
+				// TODO Auto-generated method stub
+				if(playList.getTotal() == 0){				
+					Dialogs.showAlertDialog(LinguooNewsActivity.this, "Playlist", "Debe agregar algunas noticias a su lista de reproducción.", "Cerrar");
+				}else{
+					String url = playList.getCurrentTrackURL();
+					
+					playList.setRepeatModeOn();
+					player.play(url);
+					playList.moveForward();
+				}
+			}
+		});
+	}	
 	
 	/*  *********************************************************************************************** */
 	
-	private class itemClick implements OnClickListener{
+	class itemClick implements OnClickListener{
 		@Override
 		public void onClick(View v) {
 			playNews(v);
 		}		
 	}
 	
-	private class btnAddClick implements OnClickListener {
+	class btnAddClick implements OnClickListener {
 		@Override
-		public void onClick(View v) {
-			View vParent = (View) v.getParent();
-			addNews(vParent);
+		public void onClick(View v) {			
+			addRemoveNews(v);
 		}		
-	}		
+	}
+
+	class PlayerCallback implements PlayerCallbackInterface{
+
+		@Override
+		public void playerStatus(int status, int value) {
+			// TODO Auto-generated method stub
+			switch(status){
+				case Constants.NEWS_AUDIO_ERROR:
+					Log.d(TAG,"Audio ERROR: " + value);
+					break;
+					
+				case Constants.NEWS_AUDIO_LOADING:
+					Log.d(TAG,"Audio Loading...");
+					break;
+					
+				case Constants.NEWS_AUDIO_READY:
+					Log.d(TAG,"Audio READY");
+					break;
+					
+				case Constants.NEWS_AUDIO_PLAYING:
+					progressbar.setProgress(value);
+					Log.d(TAG,"Audio PLAYING: " + value);
+					break;
+					
+				case Constants.NEWS_AUDIO_STOP:
+					Log.d(TAG,"Audio STOP");
+					break;
+					
+				case Constants.NEWS_AUDIO_PAUSE:
+					Log.d(TAG,"Audio PAUSE");
+					break;
+					
+				case Constants.NEWS_AUDIO_RESUME:
+					Log.d(TAG,"Audio RESUME");
+					break;
+
+			}
+		}
+		
+	}
+	
+	/*  *********************************************************************************************** */
+	
+	interface PlayerCallbackInterface {
+		void playerStatus(int status, int value);
+	}
+	
 }

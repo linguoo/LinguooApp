@@ -51,14 +51,16 @@
         android:textColor="#343434"
         android:textSize="12sp" />
 
-	 <Button
+	 <ToggleButton
 	     android:id="@+id/btnAddToPlaylist"
-	     android:layout_width="20dp"
-	     android:layout_height="20dp"
+	     android:layout_width="30dp"
+	     android:layout_height="30dp"
+	     android:layout_alignBottom="@+id/txtItemContent"
 	     android:layout_alignParentBottom="true"
 	     android:layout_alignParentRight="true"
-	     android:layout_alignWithParentIfMissing="false"
-	     android:layout_gravity="right|center_vertical"
-	     android:background="@drawable/btn_add_on" />
+	     android:background="@drawable/btn_add_on"
+	     android:contentDescription="@string/null_content_desc"
+	     android:textOff="@string/null_content_desc"
+	     android:textOn="@string/null_content_desc" />
  
 </RelativeLayout>

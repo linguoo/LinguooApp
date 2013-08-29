@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/mainLayout"
+    android:id="@+id/rl"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/black" >
+    android:background="@drawable/main_gradient" >
 
     <!-- android:background="@drawable/imageback" -->
 
@@ -58,6 +58,7 @@
             android:layout_marginRight="10dp"
             android:layout_toLeftOf="@id/btnAutoPlay"
             android:background="@drawable/icon_conf" />
+
     </RelativeLayout>
 
     <RelativeLayout
@@ -76,16 +77,19 @@
             android:background="@color/gray"
             android:orientation="horizontal" >
 
-            <Button
-                android:id="@+id/btnPlay"
+            <ToggleButton
+                android:id="@+id/btnPlayPause"
                 android:layout_width="30dp"
                 android:layout_height="30dp"
                 android:layout_gravity="left|center_vertical"
                 android:layout_marginLeft="5dp"
-                android:background="@drawable/btn_play" />
+                android:background="@drawable/btn_play"
+                android:textOff="@string/null_content_desc"
+                android:textOn="@string/null_content_desc" />
 
-            <ImageView
+            <ProgressBar
                 android:id="@+id/progressbar"
+                style="@android:style/Widget.ProgressBar.Horizontal"
                 android:layout_width="0dp"
                 android:layout_height="10dp"
                 android:layout_gravity="center_vertical|center_horizontal"
@@ -93,9 +97,8 @@
                 android:layout_marginRight="5dp"
                 android:layout_weight="1"
                 android:contentDescription="@string/null_content_desc"
-                android:scaleType="fitXY"
-                android:src="@drawable/progressbar_example" />
-
+                android:progressDrawable="@drawable/progressbar" />
+  
             <Button
                 android:id="@+id/btnFF"
                 android:layout_width="30dp"
@@ -111,6 +114,7 @@
             android:layout_height="20dp"
             android:layout_above="@+id/controlsLayout"
             android:layout_alignParentLeft="true"
+            android:paddingLeft="5dp"
             android:text="@string/current_news_title"
             android:textColor="@color/black" />
 
@@ -135,6 +139,7 @@
             android:id="@+id/imgNews"
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
+            android:alpha="1500"
             android:contentDescription="@string/null_content_desc"
             android:scaleType="fitXY"
             android:src="@drawable/sample" />
@@ -160,5 +165,13 @@
         android:layout_centerHorizontal="true"
         android:dividerHeight="1dp"
         android:listSelector="@drawable/news_list_selector" />
+
+    <ProgressBar
+        android:id="@+id/mainLoader"
+        style="@drawable/infiniteprogress"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true" />
 
 </RelativeLayout>

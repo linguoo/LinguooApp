@@ -1,18 +1,20 @@
 package com.mkiisoft.linguoo;
 
+import com.mkiisoft.linguoo.util.Constants;
 import com.mkiisoft.linguoo.util.ImageLoader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import android.app.Activity;
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.ToggleButton;
 
 public class CustomNewsAdapter extends BaseAdapter {
 	protected static final String TAG = "CustomNewsActivity";
@@ -49,61 +51,82 @@ public class CustomNewsAdapter extends BaseAdapter {
     }
     
     public View getView(int position, View convertView, ViewGroup parent) {
-        View vi = convertView;
+    	View viewList = convertView;
         newsHolder holder = null;
         HashMap<String, String> item = new HashMap<String, String>();
         
-        if(convertView==null){
-            vi = inflater.inflate(layoutResourceid, null);
+        if(convertView == null){
+        	viewList = inflater.inflate(layoutResourceid, null);
             holder = new newsHolder();
             
-            holder.txtItemTitle  = (TextView)vi.findViewById(R.id.txtItemTitle); 
-            holder.txtItemContent = (TextView)vi.findViewById(R.id.txtItemContent); 
-            holder.thub_image = (ImageView)vi.findViewById(R.id.imgItemNews);
-            holder.btnAdd = (Button)vi.findViewById(R.id.btnAddToPlaylist);
+            holder.txtItemTitle  = (TextView)viewList.findViewById(R.id.txtItemTitle); 
+            holder.txtItemContent = (TextView)viewList.findViewById(R.id.txtItemContent); 
+            holder.thub_image = (ImageView)viewList.findViewById(R.id.imgItemNews);
+            holder.btnAdd = (ToggleButton)viewList.findViewById(R.id.btnAddToPlaylist);
             
-            vi.setTag(holder);
-            
+            viewList.setTag(holder);
         }else{
-        	holder = (newsHolder) vi.getTag();
-        }        
-                
+  	      	holder = (newsHolder) viewList.getTag();
+        }
+
         item = data.get(position);
         
-        holder.newsId = Integer.parseInt(item.get(LinguooNewsActivity.KEY_ID));
-        holder.newsCategoryId = Integer.parseInt(item.get(LinguooNewsActivity.KEY_CATEGORY));
-        holder.newsAudioUrl = item.get(LinguooNewsActivity.KEY_AUDIO);
-        holder.txtItemTitle.setText(item.get(LinguooNewsActivity.KEY_TITLE));
-        holder.txtItemContent.setText(item.get(LinguooNewsActivity.KEY_CONTENT));
-        imageLoader.DisplayImage(item.get(LinguooNewsActivity.KEY_THUMB), holder.thub_image);
+        holder.newsId = Integer.parseInt(item.get(Constants.NEWS_ID));
+        holder.newsCategoryId = Integer.parseInt(item.get(Constants.NEWS_CATEGORY));
+        holder.newsAudioUrl = item.get(Constants.NEWS_AUDIO);
+        holder.onPlayList = Boolean.parseBoolean(item.get(Constants.NEWS_ONPLAYLIST));
+        holder.txtItemTitle.setText(item.get(Constants.NEWS_TITLE));
+        holder.txtItemContent.setText(item.get(Constants.NEWS_CONTENT));
+        holder.itemPosition = position;
+        imageLoader.DisplayImage(item.get(Constants.NEWS_THUMB), holder.thub_image);
         
-        vi.setOnClickListener (this.itemPlay);
-        holder.btnAdd.setOnClickListener(this.itemAdd);
-        holder.btnAdd.setTag(position);
+
+        if(holder.isAdded()){
+        	holder.btnAdd.setChecked(true);
+        	holder.btnAdd.setBackgroundResource(R.drawable.btn_add_off);
+        }else{
+        	holder.btnAdd.setChecked(false);
+        	holder.btnAdd.setBackgroundResource(R.drawable.btn_add_on);
+        }
         
-        return vi;
+        holder.btnAdd.setOnClickListener(itemAdd);
+        viewList.setOnClickListener (itemPlay);
+        
+        return viewList;
     }
+    
+        
+    /*  *********************************************************************************************** */
     
     static class newsHolder {
     	protected Integer newsId;
     	protected Integer newsCategoryId;
+    	protected Integer itemPosition;
     	protected String newsAudioUrl;
+    	protected Boolean onPlayList;
     	protected TextView txtItemTitle;
     	protected TextView txtItemContent;
     	protected ImageView thub_image;
-    	protected Button btnAdd;
+    	protected ToggleButton btnAdd;
     	
     	public Integer getNewsId(){
-    		return this.newsId;
+    		return newsId;
     	}
     	
     	public Integer getCategoryId(){
-    		return this.newsCategoryId;
+    		return newsCategoryId;
     	}
     	
     	public String getAudioURL(){
-    		return this.newsAudioUrl;
+    		return newsAudioUrl;
     	}
     	
+    	public Boolean isAdded(){
+    		return onPlayList;
+    	}
+    	
+    	public Integer getItemPosition(){
+    		return itemPosition;
+    	}    	    	    	
     }
 }
