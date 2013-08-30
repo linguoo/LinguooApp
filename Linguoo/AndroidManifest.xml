@@ -24,6 +24,7 @@
                 <action android:name="android.net.conn.CONNECTIVITY_CHANGE"/>
             </intent-filter>
         </receiver>
+        <activity android:screenOrientation="portrait" android:name="GridActivity"></activity>
     </application>
 
 </manifest>

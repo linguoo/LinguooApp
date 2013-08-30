@@ -1,7 +1,7 @@
 package com.mkiisoft.linguoo.util;
 
 public class Constants {
-
+	public static final String APP = "Linguoo";
 	/*Constantes de Botones*/
 	public static final int BTN_NONE=-1;
 	
@@ -45,6 +45,7 @@ public class Constants {
 	public static final String WSGETCAT = "http://ec2-54-232-205-219.sa-east-1.compute.amazonaws.com/linguoo/adevcategorias.aspx";
 	public static final String WSFEED = "";
 	public static final String WSNOTI = "";
+	public static final String WSSETSEL = "";
 
 	public static final int TESTVER = 9001;
 	public static final int LOGREG = 9002;

@@ -1,6 +1,8 @@
 package com.mkiisoft.linguoo.async;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
 import java.util.Iterator;
 
 import android.app.Activity;
@@ -11,8 +13,8 @@ import android.os.Bundle;
 import android.util.Log;
 
 public class Commons {
-	public static final String TAG = "CantoYo";
-	public static final String cacheDir = "CantoYo";
+	public static final String TAG = "Linguoo";
+	public static final String cacheDir = "Linguoo";
 	
 	public static void info( String msg ) {
 		Log.i(Commons.TAG, msg);
@@ -253,5 +255,17 @@ public class Commons {
     	} catch( Exception e ) {
     		Log.e(Commons.TAG, "Error removing tags: " + e.toString() );
     	}
+	}
+	
+	public static String readFileAsString(String filePath) throws java.io.IOException
+	{
+	    BufferedReader reader = new BufferedReader(new FileReader(filePath));
+	    String line, results = "";
+	    while( ( line = reader.readLine() ) != null)
+	    {
+	        results += line;
+	    }
+	    reader.close();
+	    return results;
 	}
 }

@@ -37,6 +37,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.mkiisoft.linguoo.async.AsyncConnection;
+import com.mkiisoft.linguoo.async.Commons;
 import com.mkiisoft.linguoo.async.ConnectionListener;
 import com.mkiisoft.linguoo.util.Constants;
 import com.mkiisoft.linguoo.util.KeySaver;
@@ -44,7 +45,7 @@ import com.mkiisoft.linguoo.util.KeySaver;
 public class LoginActivity extends Activity implements ConnectionListener{
 
 	private static final String TAG = "Linguoo Login Activity";
-	protected static final int REGISTERUSER = 90210;
+
 	private String page;
 	private TextView et_usu;
 	private TextView et_pass;
@@ -64,7 +65,6 @@ public class LoginActivity extends Activity implements ConnectionListener{
 		super.onCreate(savedInstanceState);
 		setLingouooView();
 		setListeners();
-		
 	}
 
 	private void setListeners() {
@@ -84,6 +84,11 @@ public class LoginActivity extends Activity implements ConnectionListener{
 					if (error.equals("")==false){
 						showAlertDialog(LoginActivity.this,"Linguoo",error);
 					}else{
+						page=Constants.WSLOGIN+et_usu.getText().toString()+","+et_pass.getText().toString();
+						pb_logreg.setVisibility(View.VISIBLE);
+						Log.d("Linguoo_Login",page);
+						enablebtns(false);
+						AsyncConnection.getInstance(page, LoginActivity.this, Constants.LOGIN).execute();
 						//Loguear al usuario y guardar token
 						// AsyncConnection.getInstance(WS, this, Constants.LOGIN).execute();
 					}
@@ -238,41 +243,6 @@ public class LoginActivity extends Activity implements ConnectionListener{
 	}
 
 
-
-	public class LoginAsync extends AsyncTask<String,String,String>{
-
-		@Override
-		protected String doInBackground(String... params) {
-			String result=null;
-			try{
-				HttpClient httpClient = new DefaultHttpClient();
-				HttpGet httpGet = new HttpGet(params[0]);
-
-				HttpResponse httpResponse = httpClient.execute(httpGet);
-				HttpEntity httpEntity = httpResponse.getEntity();
-				result = EntityUtils.toString(httpEntity);
-				Log.d(TAG,result);
-
-				JSONArray jsonArray = new JSONArray(result);
-				Log.d(TAG,"objetos: "+jsonArray.length());
-				/*for(int i=0;i<jsonArray.length();i++){
-					Log.d(TAG,jsonArray.getJSONObject(i).toString());
-				}*/
-
-			}catch(Exception e){
-				Log.e(TAG,e.toString());
-			}
-			return result;
-		}
-
-		@Override
-		protected void onPostExecute (String result){
-			enablebtns(true);
-		}
-
-
-	}
-
 	public void showAlertDialog(Context context, String title, String message) {
 		final SpannableString s = new SpannableString(message);
 	    Linkify.addLinks(s, Linkify.ALL);
@@ -303,27 +273,32 @@ public class LoginActivity extends Activity implements ConnectionListener{
 
 	@Override
 	public void ready(int msg, String message) {
-		pb_logreg.setVisibility(View.GONE);		
-		if (msg==Constants.REGUSER){
+		pb_logreg.setVisibility(View.GONE);
+		enablebtns(true);
+		if(msg==Constants.REGUSER || msg==Constants.LOGIN){
 			try {
 				JSONObject respuesta =new JSONObject(message);
 				if (respuesta.getInt("code")==1){
 					String usertoken = respuesta.getJSONObject("usu").getString("UsuLog");
 					KeySaver.saveShare(this,"UsuLog" ,usertoken);
-					launch(KeySaver.getIntSavedShare(this, "firsttime"));
+					if (msg==Constants.REGUSER)
+						KeySaver.saveShare(this, "FirstTime",1);
+					else KeySaver.saveShare(this, "FirstTime",0);
+					launch(KeySaver.getIntSavedShare(this, "FirstTime"));
 				}else{
-					Toast.makeText(this,"Error durante el registro, intentelo nuevamente", Toast.LENGTH_SHORT);
+					if(msg==Constants.REGUSER)
+						Toast.makeText(this,"Error durante el registro, intentelo nuevamente", Toast.LENGTH_SHORT).show();
+					else if (msg==Constants.LOGIN)
+						Toast.makeText(this,"Error durante el ingreso, intentelo nuevamente", Toast.LENGTH_SHORT).show();
 				}
 				
 			} catch (JSONException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			Log.d("Login_Linguoo","Respuesta; "+message);
-		}else if(msg==Constants.LOGIN){
-			
+		}else if(msg==Constants.RECOVER){
+			Log.d("Login_Linguoo","Respuesta; "+message);			
 		}
-
 	}
 
 	@Override
@@ -333,13 +308,13 @@ public class LoginActivity extends Activity implements ConnectionListener{
 	protected void launch(int act) {
 		Intent i = null;
 		switch(act){
-		case -1: //lanzar la configuracion de categorías una vez configurado
+		case 0: //lanzar la configuracion de categorías una vez configurado
 			//setear la key firstime en 1
 			i= new Intent(this,LoginActivity.class);
 			break;
 		case 1:// Si se loguea por primera vez se da la opcion de configurar si no se pasa
 			//directamente a las noticias
-			i= new Intent(this,LoginActivity.class);
+			i= new Intent(this,GridActivity.class);
 			break;
 		}
 		startActivity(i);
@@ -385,6 +360,7 @@ public class LoginActivity extends Activity implements ConnectionListener{
 							//aceptar y registrar Usuario
 							pb_logreg.setVisibility(View.VISIBLE);
 							Log.d("Linguoo_Login",page);
+							enablebtns(false);
 							AsyncConnection.getInstance(page, LoginActivity.this, Constants.REGUSER).execute();
 							dialog.dismiss();
 							
@@ -398,15 +374,6 @@ public class LoginActivity extends Activity implements ConnectionListener{
 					}
 				})
 				.show();
-
-		/*
-		 * webView.setOnClickListener(new OnClickListener(){
-		 * 
-		 * @Override public void onClick(View arg0) { softKeyb(1); }
-		 * 
-		 * });
-		 */
-
 	}
 	
 	private void loadImage(){
