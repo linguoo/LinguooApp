@@ -19,6 +19,7 @@ import android.app.AlertDialog.Builder;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.SpannableString;
@@ -58,8 +59,12 @@ public class LoginActivity extends Activity implements ConnectionListener{
 	private ProgressBar pb_logreg;
 	private WebView webView;
 	private ImageView imgheader;
-
-
+	
+	@Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+    }
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -310,7 +315,7 @@ public class LoginActivity extends Activity implements ConnectionListener{
 		switch(act){
 		case 0: //lanzar la configuracion de categorías una vez configurado
 			//setear la key firstime en 1
-			i= new Intent(this,LoginActivity.class);
+			i= new Intent(this,LinguooNewsActivity.class);
 			break;
 		case 1:// Si se loguea por primera vez se da la opcion de configurar si no se pasa
 			//directamente a las noticias

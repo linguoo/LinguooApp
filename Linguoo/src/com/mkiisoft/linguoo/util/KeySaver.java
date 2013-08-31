@@ -1,5 +1,7 @@
 package com.mkiisoft.linguoo.util;
 
+import java.util.Map;
+
 import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -56,4 +58,12 @@ public class KeySaver {
 		return settings.getString( AWPREFIX + keyname, null);
 	}
 	
+	public static Map<String,?> getAll(Activity a){
+		SharedPreferences settings = a.getSharedPreferences(AWKEY, Context.MODE_PRIVATE);
+		return settings.getAll();
+	}
+	
+	public static String getPrefix(){
+		return AWPREFIX;
+	}
 }

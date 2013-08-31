@@ -4,9 +4,11 @@ import java.util.Random;
 
 import com.mkiisoft.linguoo.util.Constants;
 import com.mkiisoft.linguoo.util.GraphicsUtils;
+import com.mkiisoft.linguoo.util.KeySaver;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
@@ -26,11 +28,17 @@ public class MainActivity extends Activity{
 	private Button btn_logreg;
 	private Button btn_testver;
 	
+	@Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+    }
 	
 	@Override
     protected void onCreate(Bundle savedInstanceState) {
 		//Log.d(TAG,"Linguoo Main");
-		
+		if(KeySaver.getStringSavedShare(this, "UsuLog")!=null){
+			launch(Constants.NEWS);
+		}
         super.onCreate(savedInstanceState);
         setLingouooView();
 		setListeners();
@@ -65,6 +73,8 @@ public class MainActivity extends Activity{
 		case Constants.LOGREG:
 			i= new Intent(MainActivity.this,LoginActivity.class);
 			break;
+		case Constants.NEWS:
+			i= new Intent(MainActivity.this,LinguooNewsActivity.class);
 		}
 		MainActivity.this.startActivity(i);
 		finish();

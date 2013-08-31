@@ -10,13 +10,16 @@ import java.util.ArrayList;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import com.mkiisoft.linguoo.async.AsyncConnection;
 import com.mkiisoft.linguoo.async.Commons;
 import com.mkiisoft.linguoo.async.ConnectionListener;
+import com.mkiisoft.linguoo.util.Constants;
 import com.mkiisoft.linguoo.util.KeySaver;
 
 import android.R.bool;
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.util.Log;
@@ -37,20 +40,20 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 public class GridActivity extends Activity implements ConnectionListener{
-	
+
 	@Override
 	public void onConfigurationChanged(Configuration newConfig) {
 		// TODO Auto-generated method stub
 		super.onConfigurationChanged(newConfig);
 	}
-	
+
 	private GridView gv;
 	private String usuLog="";
 	private int firstTime=0;
 	private ImageView img_back;
 	private ArrayList<ItemImage> arrayCategoria;
 	private int lastPosition=0;
-	
+
 	ImageAdapterGrid ia;
 	//boolean[] arraySelection;
 	@Override
@@ -62,7 +65,7 @@ public class GridActivity extends Activity implements ConnectionListener{
 		firstTime=KeySaver.getIntSavedShare(this, "FirstTime");
 		gv= (GridView) findViewById(R.id.gird_cat);
 		img_back=(ImageView) this.findViewById(R.id.btn_back_grid);
-		
+
 		try {	
 			InputStream is= getAssets().open("jsoncat.txt");
 			InputStreamReader reader= new InputStreamReader(is, "UTF-8");
@@ -70,22 +73,22 @@ public class GridActivity extends Activity implements ConnectionListener{
 			//comons=Commons.readFileAsString(res);
 			arrayCategoria=new ArrayList<ItemImage>();
 			JSONArray jsArrayCat= new JSONArray(res);
-			
+
 			for(int i=0; i<jsArrayCat.length(); i++)
 			{
 				JSONObject obj= (JSONObject) jsArrayCat.get(i);
 				ItemImage item=new ItemImage(selectImaginItem(obj.getInt("cat_id")), obj.getBoolean("cat_sel"), obj.getString("cat_name"), obj.getInt("cat_id"));
 				Log.v("item", selectImaginItem(obj.getInt("cat_id")) +""+ obj.getBoolean("cat_sel")+""+ obj.getString("cat_name"));
 				arrayCategoria.add(item);
-				
+
 			}
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
+
 		/* Hay que setear la imagen del boton back segun si es firs time o no*/
-		
+
 		if(checkearSeleccion()==true)
 		{
 			img_back.setVisibility(View.VISIBLE);
@@ -93,22 +96,22 @@ public class GridActivity extends Activity implements ConnectionListener{
 		else{
 			img_back.setVisibility(View.INVISIBLE);
 		}
-		
+
 		ia= new ImageAdapterGrid(this, arrayCategoria, R.layout.cat_item_grid);
 		gv.setAdapter(ia);
 		refreshGrid();
-		
+
 		gv.setOnItemClickListener(new OnItemClickListener() {
 
 			@Override
 			public void onItemClick(AdapterView<?> arg0, View arg1, int arg2,
 					long arg3) {
-				
+
 				lastPosition= arg2;
 				if(arrayCategoria.get(arg2).getImageSelected()==true)
 				{
 					arrayCategoria.get(arg2).setImageSelected(false);
-					
+
 				}
 				else
 				{
@@ -124,34 +127,33 @@ public class GridActivity extends Activity implements ConnectionListener{
 				refreshGrid();
 			}
 		});
-				
-		
+
+
 		img_back.setOnClickListener(new OnClickListener() {
-			
+
 			@Override
 			public void onClick(View v) {
-				/*llamar al web service en el asynctask*/
 				String categorias="";
 				for(int i=0; i<arrayCategoria.size(); i++)
 				{
 					if(arrayCategoria.get(i).getImageSelected()==true)
 					{
 						categorias+=","+arrayCategoria.get(i).getId();
-						
 					}
 				}
 				Log.v("categorias", categorias);
+				AsyncConnection.getInstance(Constants.WSGETCAT, GridActivity.this, Constants.CATEG).execute();
 			}
 		});
-		
+
 	}
-	
+
 	public static String getStringFromInputStream(InputStreamReader is)
 	{
 		BufferedReader reader=new BufferedReader(is);
 		StringBuilder sb=new StringBuilder();
 		String Line=null;
-		
+
 		try{
 			while((Line=reader.readLine()) != null)
 			{
@@ -164,20 +166,20 @@ public class GridActivity extends Activity implements ConnectionListener{
 		}
 		return sb.toString();
 	}
-	
+
 	private void refreshGrid(){
 		//setBotones();
 		if(gv.getAdapter()!=null){
-		//gv.invalidateViews();}
+			//gv.invalidateViews();}
 		}
 		//reloadAdapter();
 		//mAdapter.notifyDataSetChanged();
 		gv.setAdapter(ia);
 		gv.setSelection(lastPosition);
-		
+
 		ia.notifyDataSetChanged();
 	}
-	
+
 	public int selectImaginItem(int id)
 	{
 		switch(id){
@@ -195,10 +197,10 @@ public class GridActivity extends Activity implements ConnectionListener{
 			return R.drawable.ciencia_256;
 		default:
 			return R.drawable.vida_256;
-			
+
 		}
-		
-		
+
+
 	}
 	public boolean checkearSeleccion()
 	{
@@ -212,24 +214,32 @@ public class GridActivity extends Activity implements ConnectionListener{
 
 	@Override
 	public void ready(int msg, String message) {
-		
-		
-		
+		switch (msg){
+		case Constants.CATEG:
+			if (KeySaver.getIntSavedShare(GridActivity.this, "FirstTime")==1){
+				Intent i= new Intent(GridActivity.this,LinguooNewsActivity.class);
+				GridActivity.this.startActivity(i);
+			}
+			finish();
+			
+		}
+
+
 	}
 
 	@Override
 	public void cacheReady(int msg, String message) {
 		// TODO Auto-generated method stub
-		
+
 	}
-	
-	
-	
-	
-	
-	
-	
-		
-	
+
+
+
+
+
+
+
+
+
 
 }
