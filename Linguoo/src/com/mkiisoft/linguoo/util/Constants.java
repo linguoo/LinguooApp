@@ -1,7 +1,7 @@
 package com.mkiisoft.linguoo.util;
 
 public class Constants {
-
+	public static final String APP = "Linguoo";
 	/*Constantes de Botones*/
 	public static final int BTN_NONE=-1;
 	
@@ -40,9 +40,42 @@ public class Constants {
 	public static final int CAT_VID = 7;
 			
 	public static final String WSLOGIN = "http://ec2-54-232-205-219.sa-east-1.compute.amazonaws.com/linguoo/alogusersc.aspx?";
+	
 	public static final String WSREUSR = "http://ec2-54-232-205-219.sa-east-1.compute.amazonaws.com/linguoo/areguseer.aspx?";
-	public static final String WSGETCAT = "http://ec2-54-232-205-219.sa-east-1.compute.amazonaws.com/linguoo/adevcategorias.aspx";
+	public static final String WSGETCAT = "http://ec2-54-232-205-219.sa-east-1.compute.amazonaws.com/linguoo/adevcategoria.aspx?";
+	public static final String WSGETNEWS = "http://ec2-54-232-205-219.sa-east-1.compute.amazonaws.com/linguoo/alinguoonot.aspx";
 	public static final String WSFEED = "";
 	public static final String WSNOTI = "";
-	public static final String WSETCEL= "";
+
+	public static final int TESTVER = 9001;
+	public static final int LOGREG = 9002;
+	public static final int LOGIN = 1;
+	public static final int REGUSER = 2;
+	public static final int RECOVER = 3;
+	public static final int NEWS = 4;
+	public static final int CATEGQ = 8;
+	public static final int CATEGI = 9;
+	
+	public static final String NEWS_KEY_PREFIX = "news";
+	public static final String NEWS_ID = "LnCod";
+	public static final String NEWS_CATEGORY = "CatLN";
+	public static final String NEWS_AUDIO = "LnAud_GXI";
+	public static final String NEWS_TITLE = "Lntitle";
+	public static final String NEWS_CONTENT = "LnContent";
+	public static final String NEWS_THUMB = "LnImage_GXI";
+	public static final String NEWS_NARRATOR = "LnLoc";
+	public static final String NEWS_DATE = "LnFec";
+	public static final String NEWS_FEEDSLN = "FeedsLN";
+	public static final String NEWS_FEEDSLNURL = "FeedsUrlLN";
+	public static final String NEWS_ONPLAYLIST = "onPlayList";
+	public static final int NEWS_AUDIO_ERROR = 0;
+	public static final int NEWS_AUDIO_LOADING = 1;
+	public static final int NEWS_AUDIO_READY = 2;
+	public static final int NEWS_AUDIO_PLAYING = 3;
+	public static final int NEWS_AUDIO_STOP = 4;
+	public static final int NEWS_AUDIO_PAUSE = 5;
+	public static final int NEWS_AUDIO_RESUME = 6;
+	public static final int NEWS_INVISIBLE = 0;
+	public static final int NEWS_VISIBLE = 1;
+	
 }

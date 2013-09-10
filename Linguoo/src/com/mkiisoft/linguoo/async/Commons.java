@@ -13,7 +13,7 @@ import android.os.Bundle;
 import android.util.Log;
 
 public class Commons {
-	public static final String TAG = "CantoYo";
+	public static final String TAG = "Linguoo";
 	public static final String cacheDir = "CantoYo";
 	
 	public static void info( String msg ) {
