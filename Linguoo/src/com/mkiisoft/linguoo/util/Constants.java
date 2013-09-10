@@ -2,6 +2,11 @@ package com.mkiisoft.linguoo.util;
 
 public class Constants {
 
+	/* Constante utilizada por FileCache para establecer el nombre
+	 * del directorio donde se almacenarán las imágenes
+	 */
+	public static final String BASE_NAME = "Linguoo";
+	
 	/*Constantes de Botones*/
 	public static final int BTN_NONE=-1;
 	
@@ -43,7 +48,7 @@ public class Constants {
 	
 	public static final String WSREUSR = "http://ec2-54-232-205-219.sa-east-1.compute.amazonaws.com/linguoo/areguseer.aspx?";
 	public static final String WSGETCAT = "http://ec2-54-232-205-219.sa-east-1.compute.amazonaws.com/linguoo/adevcategorias.aspx";
-	public static final String WSGETNEWS = "http://ec2-54-232-205-219.sa-east-1.compute.amazonaws.com/linguoo/alinguoonot.aspx";
+	public static final String WSGETNEWS = "http://ec2-54-232-205-219.sa-east-1.compute.amazonaws.com/linguoo/alinguoonot.aspx?E5B4CE7882";
 	public static final String WSFEED = "";
 	public static final String WSNOTI = "";
 
@@ -54,7 +59,6 @@ public class Constants {
 	public static final int RECOVER = 3;
 	public static final int NEWS = 4;	
 	
-	public static final String NEWS_KEY_PREFIX = "news";
 	public static final String NEWS_ID = "LnCod";
 	public static final String NEWS_CATEGORY = "CatLN";
 	public static final String NEWS_AUDIO = "LnAud_GXI";
@@ -66,15 +70,5 @@ public class Constants {
 	public static final String NEWS_FEEDSLN = "FeedsLN";
 	public static final String NEWS_FEEDSLNURL = "FeedsUrlLN";
 	public static final String NEWS_ONPLAYLIST = "onPlayList";
-	public static final int NEWS_AUDIO_ERROR = 0;
-	public static final int NEWS_AUDIO_LOADING = 1;
-	public static final int NEWS_AUDIO_READY = 2;
-	public static final int NEWS_AUDIO_PLAYING = 3;
-	public static final int NEWS_AUDIO_STOP = 4;
-	public static final int NEWS_AUDIO_PAUSE = 5;
-	public static final int NEWS_AUDIO_RESUME = 6;
-	public static final int NEWS_INVISIBLE = 0;
-	public static final int NEWS_VISIBLE = 1;
-	
-	
+
 }
