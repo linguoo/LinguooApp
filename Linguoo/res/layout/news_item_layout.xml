@@ -58,7 +58,7 @@
 	     android:layout_alignBottom="@+id/txtItemContent"
 	     android:layout_alignParentBottom="true"
 	     android:layout_alignParentRight="true"
-	     android:background="@drawable/btn_add_on"
+	     android:background="@drawable/btn_add_off"
 	     android:contentDescription="@string/null_content_desc"
 	     android:textOff="@string/null_content_desc"
 	     android:textOn="@string/null_content_desc" />

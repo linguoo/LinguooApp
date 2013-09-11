@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/rl"
+    android:id="@+id/mainLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/main_gradient" >
@@ -11,8 +11,7 @@
         android:id="@+id/newsHeaderLayout"
         android:layout_width="fill_parent"
         android:layout_height="55dp"
-        android:background="@color/white"
-        android:paddingTop="10dp" >
+        android:background="@color/white" >
 
         <ImageView
             android:id="@+id/mainLogo"
@@ -22,49 +21,61 @@
             android:layout_centerVertical="true"
             android:layout_marginLeft="10dp"
             android:contentDescription="@string/null_content_desc"
-            android:src="@drawable/logo_linguoo" />
+            android:src="@drawable/logo" />
 
-        <Button
+        <ImageButton
             android:id="@+id/btnUser"
-            android:layout_width="35dp"
-            android:layout_height="30dp"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
             android:layout_alignParentRight="true"
-            android:layout_gravity="center_vertical|center_horizontal"
+            android:layout_centerInParent="true"
             android:layout_marginRight="10dp"
-            android:background="@drawable/icon_user" />
+            android:adjustViewBounds="false"
+            android:background="@color/white"
+            android:baselineAlignBottom="false"
+            android:contentDescription="@string/null_content_desc"
+            android:cropToPadding="false"
+            android:paddingLeft="5dp"
+            android:paddingRight="5dp"
+            android:scaleType="fitCenter"
+            android:src="@drawable/btn_user" />
 
-        <Button
+        <ImageButton
             android:id="@+id/btnAutoPlay"
-            android:layout_width="35dp"
-            android:layout_height="30dp"
-            android:layout_alignParentEnd="false"
-            android:layout_alignParentRight="false"
-            android:layout_alignParentStart="false"
-            android:layout_alignWithParentIfMissing="false"
-            android:layout_gravity="center_vertical|center_horizontal"
-            android:layout_marginRight="10dp"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_centerInParent="true"
+            android:layout_marginRight="5dp"
             android:layout_toLeftOf="@id/btnUser"
-            android:background="@drawable/icon_auto_off" />
+            android:background="@color/white"
+            android:contentDescription="@string/null_content_desc"
+            android:paddingLeft="5dp"
+            android:paddingRight="5dp"
+            android:scaleType="fitCenter"
+            android:src="@drawable/btn_auto_off" />
 
-        <Button
+        <ImageButton
             android:id="@+id/btnConfig"
-            android:layout_width="35dp"
-            android:layout_height="30dp"
-            android:layout_alignParentEnd="false"
-            android:layout_alignParentRight="false"
-            android:layout_alignParentStart="false"
-            android:layout_alignWithParentIfMissing="false"
-            android:layout_gravity="center_vertical|center_horizontal"
-            android:layout_marginRight="10dp"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_centerInParent="true"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="30dp"
+            android:layout_marginRight="5dp"
             android:layout_toLeftOf="@id/btnAutoPlay"
-            android:background="@drawable/icon_conf" />
+            android:background="@color/white"
+            android:contentDescription="@string/null_content_desc"
+            android:paddingLeft="5dp"
+            android:paddingRight="5dp"
+            android:scaleType="fitCenter"
+            android:src="@drawable/btn_conf" />
 
     </RelativeLayout>
 
     <RelativeLayout
         android:id="@+id/newsFooterLayout"
         android:layout_width="match_parent"
-        android:layout_height="60dp"
+        android:layout_height="57dp"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
         android:background="@color/white" >
@@ -77,21 +88,39 @@
             android:background="@color/gray"
             android:orientation="horizontal" >
 
-            <ToggleButton
-                android:id="@+id/btnPlayPause"
+            <RelativeLayout
                 android:layout_width="30dp"
                 android:layout_height="30dp"
                 android:layout_gravity="left|center_vertical"
-                android:layout_marginLeft="5dp"
-                android:background="@drawable/btn_play"
-                android:textOff="@string/null_content_desc"
-                android:textOn="@string/null_content_desc" />
+                android:layout_marginLeft="5dp" >
+
+                <ToggleButton
+                    android:id="@+id/btnPlayPause"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:background="@drawable/btn_play_off"
+                    android:textOff="@string/null_content_desc"
+                    android:textOn="@string/null_content_desc" />
+
+                <ProgressBar
+                    android:id="@+id/audioLoader"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="112dp"
+                    android:fitsSystemWindows="false"
+                    android:maxHeight="30dp"
+                    android:maxWidth="30dp"
+                    android:minHeight="30dp"
+                    android:minWidth="30dp"
+                    android:indeterminateDrawable="@drawable/rotation_progressbar" />
+
+            </RelativeLayout>
 
             <ProgressBar
                 android:id="@+id/progressbar"
                 style="@android:style/Widget.ProgressBar.Horizontal"
                 android:layout_width="0dp"
-                android:layout_height="10dp"
+                android:layout_height="5dp"
                 android:layout_gravity="center_vertical|center_horizontal"
                 android:layout_marginLeft="5dp"
                 android:layout_marginRight="5dp"
@@ -105,15 +134,18 @@
                 android:layout_height="30dp"
                 android:layout_gravity="right|center_vertical"
                 android:layout_marginRight="5dp"
-                android:background="@drawable/btn_ff" />
+                android:background="@drawable/btn_ff_off" />
         </LinearLayout>
 
         <TextView
-            android:id="@+id/txtNowTitle"
+            android:id="@+id/txtCurrentNewsTitle"
             android:layout_width="fill_parent"
             android:layout_height="20dp"
             android:layout_above="@+id/controlsLayout"
             android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="false"
+            android:layout_centerHorizontal="false"
+            android:layout_centerVertical="false"
             android:paddingLeft="5dp"
             android:text="@string/current_news_title"
             android:textColor="@color/black" />
@@ -121,15 +153,18 @@
         <ImageView
             android:id="@+id/footerSeparator"
             android:layout_width="fill_parent"
-            android:layout_height="5dp"
-            android:layout_above="@+id/txtNowTitle"
+            android:layout_height="2dp"
+            android:layout_above="@+id/txtCurrentNewsTitle"
+            android:layout_alignParentBottom="false"
+            android:layout_alignParentTop="true"
             android:contentDescription="@string/null_content_desc"
             android:scaleType="fitXY"
             android:src="@drawable/square" />
+
     </RelativeLayout>
 
     <FrameLayout
-        android:id="@+id/newsContentLayout"
+        android:id="@+id/newsImageHeaderLayout"
         android:layout_width="fill_parent"
         android:layout_height="150dp"
         android:layout_below="@id/newsHeaderLayout"
@@ -139,39 +174,60 @@
             android:id="@+id/imgNews"
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
-            android:alpha="1500"
+            android:alpha="100"
             android:contentDescription="@string/null_content_desc"
             android:scaleType="fitXY"
-            android:src="@drawable/sample" />
+            android:src="@drawable/logo_sample" />
 
-        <Button
+        <ImageButton
             android:id="@+id/btnAddCategory"
             android:layout_width="50dp"
             android:layout_height="50dp"
             android:layout_gravity="bottom|right"
             android:layout_marginBottom="5dp"
             android:layout_marginRight="5dp"
-            android:background="@drawable/btn_selcat"
+            android:background="@drawable/btn_add_on"
             android:contentDescription="@string/null_content_desc" />
+
+        <ImageView
+            android:id="@+id/headerSeparator"
+            android:layout_width="fill_parent"
+            android:layout_height="2dp"
+            android:layout_gravity="bottom"
+            android:contentDescription="@string/null_content_desc"
+            android:scaleType="fitXY"
+            android:src="@drawable/square" />
 
     </FrameLayout>
 
     <ListView
-        android:id="@+id/lstNews"
+        android:id="@+id/newsList"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_above="@id/newsFooterLayout"
-        android:layout_below="@id/newsContentLayout"
+        android:layout_below="@id/newsImageHeaderLayout"
         android:layout_centerHorizontal="true"
         android:dividerHeight="1dp"
         android:listSelector="@drawable/news_list_selector" />
 
-    <ProgressBar
-        android:id="@+id/mainLoader"
-        style="@drawable/infiniteprogress"
+    <LinearLayout
+        android:id="@+id/mainLoaderContent"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_alignBottom="@id/newsList"
+        android:layout_alignTop="@id/newsList"
         android:layout_centerHorizontal="true"
-        android:layout_centerVertical="true" />
+        android:layout_centerInParent="false"
+        android:gravity="center_vertical|center_horizontal"
+        android:orientation="vertical" >
+
+        <ProgressBar
+            android:id="@+id/mainLoader"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentStart="false"
+            android:indeterminateDrawable="@drawable/rotation_progressbar" />
+
+    </LinearLayout>
 
 </RelativeLayout>

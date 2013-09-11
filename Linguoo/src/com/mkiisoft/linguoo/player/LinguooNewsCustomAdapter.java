@@ -1,5 +1,6 @@
-package com.mkiisoft.linguoo;
+package com.mkiisoft.linguoo.player;
 
+import com.mkiisoft.linguoo.R;
 import com.mkiisoft.linguoo.util.Constants;
 import com.mkiisoft.linguoo.util.ImageLoader;
 import java.util.ArrayList;
@@ -16,29 +17,27 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 
-public class CustomNewsAdapter extends BaseAdapter {
+public class LinguooNewsCustomAdapter extends BaseAdapter {
 	protected static final String TAG = "CustomNewsActivity";
 	private int layoutResourceid;
     private Activity activity;
     private ArrayList<HashMap<String, String>> data;
     private LayoutInflater inflater=null;
-    public ImageLoader imageLoader;
+    private ImageLoader imageLoader;
 	private OnClickListener itemPlay;
-	private OnClickListener itemAdd; 
+	private OnClickListener itemAdd;
     
-    public CustomNewsAdapter(Activity a, int layoutResourceid, ArrayList<HashMap<String, String>> d, 
-    						 OnClickListener itemPlay, OnClickListener itemAdd) {
+    public LinguooNewsCustomAdapter(Activity a, int layoutResourceid, ArrayList<HashMap<String, String>> data, OnClickListener itemPlay) {
         this.activity = a;
-        this.data = d;
+        this.data = data;
         this.layoutResourceid = layoutResourceid;
         this.inflater = (LayoutInflater)activity.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         this.imageLoader = new ImageLoader(activity.getApplicationContext());
         this.itemPlay = itemPlay;
-        this.itemAdd = itemAdd;
-        
+        this.itemAdd = itemPlay;
     }
 
-    public int getCount() {
+	public int getCount() {
         return data.size();
     }
 
@@ -49,15 +48,15 @@ public class CustomNewsAdapter extends BaseAdapter {
     public long getItemId(int position) {
         return position;
     }
-    
+
     public View getView(int position, View convertView, ViewGroup parent) {
     	View viewList = convertView;
-        newsHolder holder = null;
-        HashMap<String, String> item = new HashMap<String, String>();
-        
+    	HashMap<String, String> item = new HashMap<String, String>();
+    	itemHolder holder = null;
+       
         if(convertView == null){
         	viewList = inflater.inflate(layoutResourceid, null);
-            holder = new newsHolder();
+            holder = new itemHolder();
             
             holder.txtItemTitle  = (TextView)viewList.findViewById(R.id.txtItemTitle); 
             holder.txtItemContent = (TextView)viewList.findViewById(R.id.txtItemContent); 
@@ -66,67 +65,47 @@ public class CustomNewsAdapter extends BaseAdapter {
             
             viewList.setTag(holder);
         }else{
-  	      	holder = (newsHolder) viewList.getTag();
+  	      	holder = (itemHolder) viewList.getTag();
         }
-
-        item = data.get(position);
         
-        holder.newsId = Integer.parseInt(item.get(Constants.NEWS_ID));
-        holder.newsCategoryId = Integer.parseInt(item.get(Constants.NEWS_CATEGORY));
-        holder.newsAudioUrl = item.get(Constants.NEWS_AUDIO);
+        item = data.get(position);
+
         holder.onPlayList = Boolean.parseBoolean(item.get(Constants.NEWS_ONPLAYLIST));
         holder.txtItemTitle.setText(item.get(Constants.NEWS_TITLE));
         holder.txtItemContent.setText(item.get(Constants.NEWS_CONTENT));
         holder.itemPosition = position;
         imageLoader.DisplayImage(item.get(Constants.NEWS_THUMB), holder.thub_image);
-        
-
+                
         if(holder.isAdded()){
         	holder.btnAdd.setChecked(true);
         	holder.btnAdd.setBackgroundResource(R.drawable.btn_add_on);
         }else{
         	holder.btnAdd.setChecked(false);
         	holder.btnAdd.setBackgroundResource(R.drawable.btn_add_off);
-        }
-        
+        };
+         
         holder.btnAdd.setOnClickListener(itemAdd);
         viewList.setOnClickListener (itemPlay);
-        
         return viewList;
     }
     
         
     /*  *********************************************************************************************** */
     
-    static class newsHolder {
-    	protected Integer newsId;
-    	protected Integer newsCategoryId;
-    	protected Integer itemPosition;
-    	protected String newsAudioUrl;
-    	protected Boolean onPlayList;
+    static class itemHolder {
     	protected TextView txtItemTitle;
     	protected TextView txtItemContent;
     	protected ImageView thub_image;
     	protected ToggleButton btnAdd;
+    	protected int itemPosition;
+    	protected Boolean onPlayList;
     	
-    	public Integer getNewsId(){
-    		return newsId;
-    	}
-    	
-    	public Integer getCategoryId(){
-    		return newsCategoryId;
-    	}
-    	
-    	public String getAudioURL(){
-    		return newsAudioUrl;
+    	public int getItemPosition(){
+    		return itemPosition;
     	}
     	
     	public Boolean isAdded(){
     		return onPlayList;
     	}
-    	
-    	public Integer getItemPosition(){
-    		return itemPosition;
-    	}    	    	    	
     }
 }

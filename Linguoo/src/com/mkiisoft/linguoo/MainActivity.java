@@ -2,31 +2,25 @@ package com.mkiisoft.linguoo;
 
 import java.util.Random;
 
-import com.mkiisoft.linguoo.util.Constants;
-import com.mkiisoft.linguoo.util.GraphicsUtils;
-import com.mkiisoft.linguoo.util.KeySaver;
-
 import android.app.Activity;
 import android.content.Intent;
 import android.content.res.Configuration;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.Matrix;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.ImageView;
 
+import com.mkiisoft.linguoo.util.Constants;
+import com.mkiisoft.linguoo.util.KeySaver;
+
 public class MainActivity extends Activity{
 	
-	private int ws,hs,wi,hi;
+
 	private ImageView imgHeader;
 	private Button btn_logreg;
 	private Button btn_testver;
+	private String usuLog;
 	
 	@Override
     public void onConfigurationChanged(Configuration newConfig) {
@@ -36,8 +30,12 @@ public class MainActivity extends Activity{
 	@Override
     protected void onCreate(Bundle savedInstanceState) {
 		//Log.d(TAG,"Linguoo Main");
-		if(KeySaver.getStringSavedShare(this, "UsuLog")!=null){
-			launch(Constants.NEWS);
+		int state =KeySaver.getIntSavedShare(this, "state");
+		usuLog = KeySaver.getStringSavedShare(this, "UsuLog");
+		if(state>-1 && state!=Constants.MAIN){
+			launch(state);
+		}else{
+			KeySaver.saveShare(this, "state", Constants.MAIN);
 		}
         super.onCreate(savedInstanceState);
         setLingouooView();
@@ -59,6 +57,8 @@ public class MainActivity extends Activity{
 			@Override
 			public void onClick(View arg0) {
 				launch(Constants.TESTVER);
+				
+				
 			}
 			
 		});
@@ -66,18 +66,28 @@ public class MainActivity extends Activity{
 
 	protected void launch(int act) {
 		Intent i = null;
+		KeySaver.saveShare(MainActivity.this, "state", act);
 		switch(act){
 		case Constants.TESTVER:
-			i= new Intent(MainActivity.this,LoginActivity.class);
+			KeySaver.saveShare(MainActivity.this, "UsuLog", "2F5B3F3CB0");
+			KeySaver.saveShare(MainActivity.this, "UsuCod", "prueba");
+			i= new Intent(MainActivity.this,LinguooNewsActivity.class);
 			break;
 		case Constants.LOGREG:
 			i= new Intent(MainActivity.this,LoginActivity.class);
 			break;
 		case Constants.NEWS:
 			i= new Intent(MainActivity.this,LinguooNewsActivity.class);
+			break;
+		case Constants.CATEG:
+			i= new Intent(MainActivity.this,GridActivity.class);
+			break;
+		default:
 		}
 		MainActivity.this.startActivity(i);
-		finish();
+		if (act == Constants.NEWS || act == Constants.CATEG){
+			finish();
+		}
 	}
 
 	private void setLingouooView() {

@@ -68,6 +68,7 @@ public class LoginActivity extends Activity implements ConnectionListener{
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		KeySaver.saveShare(this, "state", Constants.LOGREG);
 		setLingouooView();
 		setListeners();
 	}
@@ -284,11 +285,14 @@ public class LoginActivity extends Activity implements ConnectionListener{
 			try {
 				JSONObject respuesta =new JSONObject(message);
 				if (respuesta.getInt("code")==1){
-					String usertoken = respuesta.getJSONObject("usu").getString("UsuLog");
-					KeySaver.saveShare(this,"UsuLog" ,usertoken);
+					String temp = respuesta.getJSONObject("usu").getString("UsuLog");
+					KeySaver.saveShare(this,"UsuLog" ,temp);
+					temp = respuesta.getJSONObject("usu").getString("UsuCod");
+					KeySaver.saveShare(this,"UsuCod", temp);
 					if (msg==Constants.REGUSER)
-						KeySaver.saveShare(this, "FirstTime",1);
-					else KeySaver.saveShare(this, "FirstTime",0);
+						KeySaver.saveShare(this, "FirstTime",Constants.FT_YES);
+					else KeySaver.saveShare(this, "FirstTime",Constants.FT_NO);
+					
 					launch(KeySaver.getIntSavedShare(this, "FirstTime"));
 				}else{
 					if(msg==Constants.REGUSER)
@@ -313,15 +317,16 @@ public class LoginActivity extends Activity implements ConnectionListener{
 	protected void launch(int act) {
 		Intent i = null;
 		switch(act){
-		case 0: //lanzar la configuracion de categorías una vez configurado
+		case Constants.FT_NO: //lanzar la configuracion de categorías una vez configurado
 			//setear la key firstime en 1
 			i= new Intent(this,LinguooNewsActivity.class);
 			break;
-		case 1:// Si se loguea por primera vez se da la opcion de configurar si no se pasa
+		case Constants.FT_YES:// Si se loguea por primera vez se da la opcion de configurar si no se pasa
 			//directamente a las noticias
 			i= new Intent(this,GridActivity.class);
 			break;
 		}
+		i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 		startActivity(i);
 		finish();
 	}
@@ -346,7 +351,6 @@ public class LoginActivity extends Activity implements ConnectionListener{
 				switch (event.getAction()) {
 				case MotionEvent.ACTION_DOWN:
 				case MotionEvent.ACTION_UP:
-					//Log.d("OAuth gamba", "Foco al webview");
 					if (!v.hasFocus()) {
 						v.requestFocus();
 					}

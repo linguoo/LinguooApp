@@ -29,7 +29,9 @@ public class Constants {
 	public static final int BTN_BLOGS = 122;
 	
 	public static final int WELCOME = 199;
-	
+
+	public static final int FT_YES = 1;
+	public static final int FT_NO = 0;
 	
 	public static final int CAT_ACT = 1;
 	public static final int CAT_NEG = 2;
@@ -42,8 +44,8 @@ public class Constants {
 	public static final String WSLOGIN = "http://ec2-54-232-205-219.sa-east-1.compute.amazonaws.com/linguoo/alogusersc.aspx?";
 	
 	public static final String WSREUSR = "http://ec2-54-232-205-219.sa-east-1.compute.amazonaws.com/linguoo/areguseer.aspx?";
-	public static final String WSGETCAT = "http://ec2-54-232-205-219.sa-east-1.compute.amazonaws.com/linguoo/adevcategoria.aspx";
-	public static final String WSGETNEWS = "http://ec2-54-232-205-219.sa-east-1.compute.amazonaws.com/linguoo/alinguoonot.aspx";
+	public static final String WSGETCAT = "http://ec2-54-232-205-219.sa-east-1.compute.amazonaws.com/linguoo/adevcategoria.aspx?";
+	public static final String WSGETNEWS = "http://ec2-54-232-205-219.sa-east-1.compute.amazonaws.com/linguoo/alinguoonot.aspx?";
 	public static final String WSFEED = "";
 	public static final String WSNOTI = "";
 
@@ -54,6 +56,12 @@ public class Constants {
 	public static final int RECOVER = 3;
 	public static final int NEWS = 4;
 	public static final int CATEG = 5;
+	public static final int MAIN = 6;
+	public static final int CATEGQ = 8;
+	public static final int CATEGI = 9;
+	public static final int CATCHG = 10;
+	public static final int CATUCHG = 11;
+
 	
 	public static final String NEWS_KEY_PREFIX = "news";
 	public static final String NEWS_ID = "LnCod";

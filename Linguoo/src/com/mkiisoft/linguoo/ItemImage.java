@@ -19,11 +19,11 @@ public class ItemImage {
 		this.imageView = imageView;
 	}
 
-	public boolean getImageSelected() {
+	public int getImageSelected() {
 		return imageSelected;
 	}
 
-	public void setImageSelected(boolean imageSelected) {
+	public void setImageSelected(int imageSelected) {
 		this.imageSelected = imageSelected;
 	}
 
@@ -37,11 +37,11 @@ public class ItemImage {
 
 	
 	private int imageView;
-	private boolean imageSelected;
+	private int imageSelected;
 	private String textCategoria;
 	private int id;
 	
-	public ItemImage(int imageView, boolean imageSelected, String textCategoria, int id) {
+	public ItemImage(int imageView, int imageSelected, String textCategoria, int id) {
 		
 		this.imageView = imageView;
 		this.imageSelected = imageSelected;

@@ -97,7 +97,7 @@ public class ImageAdapterGrid extends BaseAdapter {
 		holder.t.setText(arrayCat.get(position).getTextCategoria());
 		holder.iv.setBackgroundResource(arrayCat.get(position).getImageView());
 		
-		if(arrayCat.get(position).getImageSelected()==true)
+		if(arrayCat.get(position).getImageSelected()==1)
 		{
 			holder.chk.setBackgroundResource(R.drawable.cat_select);
 		}
