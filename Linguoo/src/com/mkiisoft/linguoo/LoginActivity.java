@@ -281,7 +281,9 @@ public class LoginActivity extends Activity implements ConnectionListener{
 	public void ready(int msg, String message) {
 		pb_logreg.setVisibility(View.GONE);
 		enablebtns(true);
-		if(msg==Constants.REGUSER || msg==Constants.LOGIN){
+		switch(msg){
+		case Constants.REGUSER:
+		case Constants.LOGIN:
 			try {
 				JSONObject respuesta =new JSONObject(message);
 				if (respuesta.getInt("code")==1){
@@ -305,8 +307,14 @@ public class LoginActivity extends Activity implements ConnectionListener{
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-		}else if(msg==Constants.RECOVER){
+			break;
+		case Constants.RECOVER:
 			Log.d("Login_Linguoo","Respuesta; "+message);			
+			break;
+		case AsyncConnection.NOCONNECTION:
+		case AsyncConnection.ERROR:
+			showAlertDialog(LoginActivity.this, "Ha ocurrido un Error", "Por favor, intentelo mas tarde");
+			break;
 		}
 	}
 

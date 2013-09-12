@@ -324,6 +324,7 @@ public class GridActivity extends Activity implements ConnectionListener{
 			/*
 			 * Dialogo error de conexion volver a intentar
 			 */
+			
 			showAlertDialog(GridActivity.this, "Ha ocurrido un Error", "Por favor, intentelo mas tarde");
 			break;
 		}
