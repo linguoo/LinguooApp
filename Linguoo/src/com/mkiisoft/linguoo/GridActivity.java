@@ -40,6 +40,7 @@ import android.widget.Checkable;
 import android.widget.FrameLayout;
 import android.widget.GridView;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -58,24 +59,25 @@ public class GridActivity extends Activity implements ConnectionListener{
 	private ArrayList<ItemImage> arrayCategoria;
 	private int lastPosition=0;
 	private String seleccionadas;
-
+	private ProgressBar pb;
 	ImageAdapterGrid ia;
-	//boolean[] arraySelection;
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 	
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.catchioce_layout);
-		//usuLog= KeySaver.getStringSavedShare(this, "UsuLog");
-		usuLog="E5B4CE7882";
-		
+		pb= (ProgressBar)findViewById(R.id.progress_bar);
+		pb.setVisibility(pb.VISIBLE);
+		usuLog= KeySaver.getStringSavedShare(this, "UsuLog");
+				
 		firstTime=KeySaver.getIntSavedShare(this, "FirstTime");
 		gv= (GridView) findViewById(R.id.gird_cat);
 		img_back=(ImageView) this.findViewById(R.id.btn_back_grid);
 		String page = Constants.WSGETCAT+usuLog+",Q";
 		arrayCategoria=new ArrayList<ItemImage>();
 		AsyncConnection.getInstance(page, this, Constants.CATEGQ).execute();
-		Log.d("Categ",page);
+	
 
 		
 		
@@ -87,8 +89,8 @@ public class GridActivity extends Activity implements ConnectionListener{
 			
 			showAlertDialog(GridActivity.this, "Bienvenido!!", "Elija al menos una categoria que sea de su interes."); 
 			img_back.setBackgroundResource(R.drawable.icon_next);
-			firstTime=0;
-			//KeySaver.saveShare(this, "FirstTime", 0);
+	
+			KeySaver.saveShare(this, "FirstTime", 0);
 		}
 		else
 		{
@@ -155,11 +157,11 @@ public class GridActivity extends Activity implements ConnectionListener{
 			}
 			
 		}
-		Log.v("comparacion", seleccionadas+"---"+categorias);
+		
 		if(!seleccionadas.equals(categorias)){
 			
 			String page=Constants.WSGETCAT+usuLog+",I,"+categorias;
-			
+			pb.setVisibility(pb.VISIBLE);
 			AsyncConnection.getInstance(page, GridActivity.this, Constants.CATEGI).execute();
 		}else{
 			
@@ -184,6 +186,7 @@ public class GridActivity extends Activity implements ConnectionListener{
 		//mAdapter.notifyDataSetChanged();
 		gv.setAdapter(ia);
 		gv.setSelection(lastPosition);
+		
 		
 		ia.notifyDataSetChanged();
 	}
@@ -293,7 +296,7 @@ public class GridActivity extends Activity implements ConnectionListener{
 				
 				e.getMessage();
 			}
-
+				pb.setVisibility(pb.INVISIBLE);
 				dibujar_grilla();
 				refreshGrid();
 			
