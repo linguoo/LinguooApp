@@ -40,6 +40,7 @@ import android.widget.Checkable;
 import android.widget.FrameLayout;
 import android.widget.GridView;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -50,26 +51,26 @@ public class GridActivity extends Activity implements ConnectionListener{
 	
 		super.onConfigurationChanged(newConfig);
 	}
-
+	private final String TAG="Linguoo Categorias";
 	private GridView gv;
 	private String usuLog="";
 	private int firstTime=0;
 	private ImageView img_back;
 	private ArrayList<ItemImage> arrayCategoria;
 	private int lastPosition=0;
-	private String seleccionadas;
-
-
+	private String seleccionadas, categorias;
+	private ProgressBar pb;
 	ImageAdapterGrid ia;
-	//boolean[] arraySelection;
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 	
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.catchioce_layout);
+		pb= (ProgressBar)findViewById(R.id.progress_bar);
+		pb.setVisibility(pb.VISIBLE);
 		usuLog= KeySaver.getStringSavedShare(this, "UsuLog");
-		
-		
+				
 		firstTime=KeySaver.getIntSavedShare(this, "FirstTime");
 		KeySaver.saveShare(this, "state", Constants.CATEG);
 		gv= (GridView) findViewById(R.id.gird_cat);
@@ -77,7 +78,7 @@ public class GridActivity extends Activity implements ConnectionListener{
 		String page = Constants.WSGETCAT+usuLog+",Q";
 		arrayCategoria=new ArrayList<ItemImage>();
 		AsyncConnection.getInstance(page, this, Constants.CATEGQ).execute();
-		Log.d("Categ",page);
+	
 
 		
 		
@@ -89,8 +90,8 @@ public class GridActivity extends Activity implements ConnectionListener{
 			
 			showAlertDialog(GridActivity.this, "Bienvenido!!", "Elija al menos una categoria que sea de su interes."); 
 			img_back.setBackgroundResource(R.drawable.icon_next);
-			firstTime=0;
-			//KeySaver.saveShare(this, "FirstTime", 0);
+	
+			KeySaver.saveShare(this, "FirstTime", 0);
 		}
 		else
 		{
@@ -150,28 +151,33 @@ public class GridActivity extends Activity implements ConnectionListener{
 		
 		@Override
 		public void onClick(View v) {
-			String categorias="";
+		categorias="";
 		for(int i=0; i<arrayCategoria.size(); i++){
 			if(arrayCategoria.get(i).getImageSelected()==1){
 				categorias+=arrayCategoria.get(i).getId();
 			}
 			
 		}
-		Log.v("comparacion", seleccionadas+"---"+categorias);
+		Log.d(TAG,"Seleccionadas: "+seleccionadas+" - categorias: "+categorias);
 		if(!seleccionadas.equals(categorias)){
 			
 			String page=Constants.WSGETCAT+usuLog+",I,"+categorias;
-			
+			pb.setVisibility(pb.VISIBLE);
 			AsyncConnection.getInstance(page, GridActivity.this, Constants.CATEGI).execute();
 		}else{
-			if (firstTime==Constants.FT_NO){
-				Intent i = new Intent();
-				setResult(Constants.CATUCHG, i);        
-				finish();
-			}
-			else{
+			if (LinguooNewsActivity.isNewsActivityIsOpen()==false){
+				Log.d(TAG,"LinguooNewsActivity is Closed ");
+				Intent returnIntent=new Intent(GridActivity.this, LinguooNewsActivity.class);
+				startActivity(returnIntent);
 				
+			}else {
+				Intent returnIntent = new Intent();
+				Log.d(TAG,"No hubo cambios");
+				setResult(Constants.CATUCHG, returnIntent);
 			}
+			finish();
+
+
 		}
 			
 		}
@@ -191,6 +197,7 @@ public class GridActivity extends Activity implements ConnectionListener{
 		//mAdapter.notifyDataSetChanged();
 		gv.setAdapter(ia);
 		gv.setSelection(lastPosition);
+		
 		
 		ia.notifyDataSetChanged();
 	}
@@ -292,7 +299,7 @@ public class GridActivity extends Activity implements ConnectionListener{
 							Integer.valueOf(categorias.getJSONObject(i).getString("CatLN")));
 					
 					arrayCategoria.add(im);
-					
+					GridActivity.this.categorias = seleccionadas;
 					selected=0;
 				}
 				
@@ -300,7 +307,7 @@ public class GridActivity extends Activity implements ConnectionListener{
 				
 				e.getMessage();
 			}
-
+				pb.setVisibility(pb.INVISIBLE);
 				dibujar_grilla();
 				refreshGrid();
 			
@@ -309,13 +316,15 @@ public class GridActivity extends Activity implements ConnectionListener{
 			/*
 			 * Llamar al intent para pasar a noticias
 			 */
-			if (firstTime==Constants.FT_YES || LinguooNewsActivity.isNewsActivityIsOpen()==false){
-				Intent in=new Intent(GridActivity.this, LinguooNewsActivity.class);
-				startActivity(in);
-				finish();
-			}else if (firstTime==Constants.FT_NO){
-				Intent i = new Intent();
-				setResult(Constants.CATCHG, i);        
+			if (LinguooNewsActivity.isNewsActivityIsOpen()==false){
+				Log.d(TAG,"LinguooNewsActivity is Closed ");
+				Intent returnIntent=new Intent(GridActivity.this, LinguooNewsActivity.class);
+				startActivity(returnIntent);
+				
+			}else {
+				Intent returnIntent = new Intent();
+				Log.d(TAG,"Cambiaron");
+				setResult(Constants.CATCHG, returnIntent);
 				finish();
 			}
 		break;
@@ -324,7 +333,6 @@ public class GridActivity extends Activity implements ConnectionListener{
 			/*
 			 * Dialogo error de conexion volver a intentar
 			 */
-			
 			showAlertDialog(GridActivity.this, "Ha ocurrido un Error", "Por favor, intentelo mas tarde");
 			break;
 		}

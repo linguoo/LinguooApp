@@ -1,28 +1,37 @@
 package com.mkiisoft.linguoo.player;
 
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.Bitmap;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.media.MediaPlayer.OnCompletionListener;
 import android.media.MediaPlayer.OnErrorListener;
 import android.media.MediaPlayer.OnPreparedListener;
+import android.net.wifi.WifiManager;
+import android.net.wifi.WifiManager.WifiLock;
 import android.os.IBinder;
+import android.support.v4.app.NotificationCompat;
+import android.support.v4.app.TaskStackBuilder;
 import android.util.Log;
 
+import com.mkiisoft.linguoo.LinguooNewsActivity;
+import com.mkiisoft.linguoo.R;
 import com.mkiisoft.linguoo.util.Constants;
+import com.mkiisoft.linguoo.util.ImageLoader;
 
 public class LinguooMediaPlayerService extends Service{
 	protected static final String TAG = "Linguoo MediaPlayer Service";
 	
+	private static final int NOTIFICATION_ID = 42;
 	private MediaPlayer mediaPlayer;
 	private Boolean mediaPlayerStarted = false;
 	private ArrayList<String> playList;
@@ -32,21 +41,27 @@ public class LinguooMediaPlayerService extends Service{
 	private String currentTitle;
 	private String currentImage;
 	private Intent playbackintent;
+	private int playbackStatus;
 	private int index;
 	private Boolean autoPlay = false;
-	
+	private WifiLock wifiLock;
 	private IntentFilter mpReceiverFilter;
+	private ProgressbarObserver progressBarObserver;
+	private Thread playingThread;
 	
 	@Override
 	public void onCreate() {
 		Log.d(TAG,"Service Created...");
+		wifiLock = ((WifiManager) getSystemService(Context.WIFI_SERVICE)).createWifiLock(WifiManager.WIFI_MODE_FULL, "LinguooLock");
 		registerMediaReceiver();
 	}
 	
 	@Override
 	public void onDestroy() {
 	    // TODO Auto-generated method stub
+		Log.d(TAG,"SERVICE ONDESTROY");
 	    super.onDestroy();
+	    releaseMediaPlayer();
 	    unregisterMediaReceiver();
 	}
 	
@@ -62,7 +77,7 @@ public class LinguooMediaPlayerService extends Service{
     public int onStartCommand(Intent intent, int flags, int startId) {
         // TODO Auto-generated method stub
 		Log.d(TAG,"Service Started...");
-		return START_STICKY;
+		return Service.START_NOT_STICKY;
     }  
 	
 	/********************************************************************************************************/
@@ -71,7 +86,7 @@ public class LinguooMediaPlayerService extends Service{
 		releaseMediaPlayer();
 		
 		if(url.equals("")){
-			sendPlaybackStatus(LinguooMediaPlayerInterface.ON_PLAYER_ERROR);
+			sendPlaybackStatus(LinguooMediaPlayerInterface.ON_INVALID_URL);
 		}else{		
 			if(mediaPlayer == null){
 				mediaPlayer = new MediaPlayer();
@@ -90,41 +105,51 @@ public class LinguooMediaPlayerService extends Service{
 			}
 			sendPlaybackStatus(LinguooMediaPlayerInterface.ON_PLAYER_LOADING);
 			sendPlaybackTitle(title,image);
+			initNotification(title, image);
+			wifiLock.acquire();
 		}
 		sendProgressStatus(0);
 	}
 	
 	private void moveNext(){
 		Log.d(TAG, "AUTO PLAY: " + autoPlay);
-		if(autoPlay && (playList != null && playList.size() > 0)){
-			index++;
-			
-			if((index >= playList.size()) || (playList.size() == 1))index = 0;
-			
-			currentURL = playList.get(index);
-			currentTitle = titleList.get(index);
-			currentImage = imageList.get(index);
-			prepareMediaPlayer(currentURL, currentTitle, currentImage);
-		}else if(autoPlay){
-			prepareMediaPlayer(currentURL, currentTitle, currentImage);
+		if(autoPlay){
+			if(playList != null){
+				index++;
+				Log.d(TAG,"INDEX PRE: " + index);
+				if(playList.size() == 1)index = 0;
+				else if(index >= playList.size())index = 0;
+				
+				Log.d(TAG,"INDEX POST: " + index);
+				currentURL = playList.get(index);
+				currentTitle = titleList.get(index);
+				currentImage = imageList.get(index);
+			}
+			prepareMediaPlayer(currentURL, currentTitle, currentImage);			
 		}
 	}
 	
 	private void releaseMediaPlayer(){
 		if (mediaPlayer != null) {
 			if(mediaPlayer.isPlaying()) {
+				stopProgressbarUpdater();
 				mediaPlayer.stop();
 			}
 			mediaPlayer.release();
 			mediaPlayer = null;
-			mediaPlayerStarted = false;
 		}
+		if(wifiLock.isHeld())wifiLock.release();
+		mediaPlayerStarted = false;
+		cancelNotification();
+		sendProgressStatus(0);
 		sendPlaybackStatus(LinguooMediaPlayerInterface.ON_PLAYER_RELEASE);
 	}
 	
 	private void pauseMediaPlayer(){
 		if (mediaPlayer != null) {
 			mediaPlayer.pause();
+			//cancelNotification();
+			wifiLock.release();
 		}
 		sendPlaybackStatus(LinguooMediaPlayerInterface.ON_PLAYER_PAUSE);
 	}
@@ -133,6 +158,8 @@ public class LinguooMediaPlayerService extends Service{
 		if (mediaPlayer != null) {
 			if(!mediaPlayer.isPlaying())startProgressbarUpdater();
 			mediaPlayer.start();
+			initNotification(currentTitle, currentImage);
+			wifiLock.acquire();
 		}
 		sendPlaybackStatus(LinguooMediaPlayerInterface.ON_PLAYER_RESUME);
 	}
@@ -140,6 +167,36 @@ public class LinguooMediaPlayerService extends Service{
 	private void setAutoPlay(Boolean value){
 		Log.d(TAG,"AutoPlay is: " + value); 
 		autoPlay = value;
+	}
+	
+	private int getPosition(){
+		if(mediaPlayer != null)return (mediaPlayer.getCurrentPosition() * 100) / mediaPlayer.getDuration();
+		else return 0;
+	}
+	
+	private void updatePlayerView(){
+		switch(playbackStatus){
+			case LinguooMediaPlayerInterface.ON_PLAYER_RESUME: 
+			case LinguooMediaPlayerInterface.ON_PLAYER_PLAYING:
+				sendPlaybackStatus(playbackStatus);
+				sendPlaybackTitle(currentTitle,currentImage);
+				break;
+			case LinguooMediaPlayerInterface.ON_PLAYER_LOADING:
+				sendPlaybackStatus(playbackStatus);
+				sendPlaybackTitle(currentTitle,currentImage);
+				break;
+			case LinguooMediaPlayerInterface.ON_PLAYER_PAUSE:
+				sendPlaybackStatus(playbackStatus);
+				sendPlaybackTitle(currentTitle,currentImage);
+				sendProgressStatus(getPosition());
+				break;
+			case LinguooMediaPlayerInterface.ON_PLAYER_COMPLETE:
+				sendPlaybackStatus(playbackStatus);
+				sendPlaybackTitle(currentTitle,currentImage);
+			case LinguooMediaPlayerInterface.ON_PLAYER_ERROR:
+				sendPlaybackStatus(playbackStatus);
+				break;
+		}
 	}
 	
 	private void registerMediaReceiver(){
@@ -154,7 +211,8 @@ public class LinguooMediaPlayerService extends Service{
 			mpReceiverFilter.addAction("pauseThisAudio");
 			mpReceiverFilter.addAction("resumeThisAudio");
 			mpReceiverFilter.addAction("setAutoPlay");
-	
+			mpReceiverFilter.addAction("updatePlayerView");
+				
 			registerReceiver(mpReceiver, mpReceiverFilter);
 		}
 	}
@@ -165,7 +223,8 @@ public class LinguooMediaPlayerService extends Service{
 	
 	private void sendPlaybackStatus(int status){
 		playbackintent.setAction("playbackStatus");         
-		playbackintent.putExtra("playback", status);         
+		playbackintent.putExtra("playback", status);
+		playbackStatus = status;
         sendBroadcast(playbackintent);
 	}
 	
@@ -182,12 +241,19 @@ public class LinguooMediaPlayerService extends Service{
         sendBroadcast(playbackintent);
 	}
 	
+
 	private void startProgressbarUpdater(){
-		MediaObserver observer = new MediaObserver();
-		Thread playingThread = new Thread(observer);
+		progressBarObserver = new ProgressbarObserver();
+		playingThread = new Thread(progressBarObserver);
 		mediaPlayerStarted = true;
 		playingThread.start();
-		
+	}
+	
+	private void stopProgressbarUpdater(){
+		progressBarObserver.stop();
+		progressBarObserver = null;
+		playingThread = null;
+		mediaPlayerStarted = false;
 	}
 	
 	private void broadcastHandler(Intent intent){
@@ -197,7 +263,7 @@ public class LinguooMediaPlayerService extends Service{
 			playList = intent.getStringArrayListExtra("playList");
 		}else if(action.equals("updateTitleList")){
 			titleList = intent.getStringArrayListExtra("titleList");
-		}else if(action.equals("updateTitleList")){
+		}else if(action.equals("updateImageList")){
 			imageList = intent.getStringArrayListExtra("imageList");
 		}else if(action.equals("playThisAudio")){
 			currentURL = intent.getStringArrayListExtra("play").get(1);
@@ -210,9 +276,9 @@ public class LinguooMediaPlayerService extends Service{
 			resumeMediaPlayer();
 		}else if(action.equals("setAutoPlay")){
 			setAutoPlay(Boolean.parseBoolean(intent.getStringExtra("autoPlay")));
+		}else if(action.equals("updatePlayerView")){
+			updatePlayerView();
 		}
-		
-		
 	}
 	
     private BroadcastReceiver mpReceiver = new BroadcastReceiver() {
@@ -245,10 +311,12 @@ public class LinguooMediaPlayerService extends Service{
 			@Override
 			public void onCompletion(MediaPlayer mp) {
 				// TODO Auto-generated method stub
+				wifiLock.release();
 				mediaPlayerStarted = false;
 				sendPlaybackStatus(LinguooMediaPlayerInterface.ON_PLAYER_COMPLETE);
 				sendProgressStatus(0);
-				//moveNext();
+				cancelNotification();
+				moveNext();
 			}
 			
 		});
@@ -268,7 +336,40 @@ public class LinguooMediaPlayerService extends Service{
 	
 	/******************************************************************************************************/
 	
-	class MediaObserver implements Runnable{
+	private void initNotification(String title, String image){
+		Context context = getApplicationContext();
+		ImageLoader il = new ImageLoader(context);
+		Bitmap icon = il.getImageAsBitmap(image);
+				
+		NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(this)
+			.setAutoCancel(true)
+			.setSmallIcon(R.drawable.logo)
+			.setLargeIcon(icon)
+		    .setContentTitle("Linguoo Noticias")
+		    .setContentText(title);
+		
+		Intent resultIntent = new Intent(this, LinguooNewsActivity.class);
+		TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
+		stackBuilder.addParentStack(LinguooNewsActivity.class);
+		stackBuilder.addNextIntent(resultIntent);
+		
+		PendingIntent resultPendingIntent = stackBuilder.getPendingIntent(0,PendingIntent.FLAG_UPDATE_CURRENT);
+		mBuilder.setContentIntent(resultPendingIntent);
+		NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+		//mNotificationManager.notify(NOTIFICATION_ID, mBuilder.build());
+		startForeground(NOTIFICATION_ID,mBuilder.build());
+	}
+	
+	private void cancelNotification() {
+		NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+		//mNotificationManager.cancel(NOTIFICATION_ID);
+		stopForeground(true);
+	}
+		
+	
+	/******************************************************************************************************/
+	
+	class ProgressbarObserver implements Runnable{
 		private AtomicBoolean stop = new AtomicBoolean(false);
 		private Integer counter = 0; 
 		
@@ -281,8 +382,9 @@ public class LinguooMediaPlayerService extends Service{
 			// TODO Auto-generated method stub
 			while (!stop.get() && mediaPlayerStarted){
 				if(mediaPlayer.isPlaying()){
-					counter = (mediaPlayer.getCurrentPosition() * 100) / mediaPlayer.getDuration();
+					counter = getPosition();
 					sendProgressStatus(counter);
+				
 					try {
 						Thread.sleep(200);
 					}catch (InterruptedException e) {

@@ -26,8 +26,9 @@ public class LinguooNewsCustomAdapter extends BaseAdapter {
     private ImageLoader imageLoader;
 	private OnClickListener itemPlay;
 	private OnClickListener itemAdd;
+	private Boolean isDemoUser;
     
-    public LinguooNewsCustomAdapter(Activity a, int layoutResourceid, ArrayList<HashMap<String, String>> data, OnClickListener itemPlay) {
+    public LinguooNewsCustomAdapter(Activity a, int layoutResourceid, ArrayList<HashMap<String, String>> data, OnClickListener itemPlay, Boolean isDemoUser) {
         this.activity = a;
         this.data = data;
         this.layoutResourceid = layoutResourceid;
@@ -35,6 +36,7 @@ public class LinguooNewsCustomAdapter extends BaseAdapter {
         this.imageLoader = new ImageLoader(activity.getApplicationContext());
         this.itemPlay = itemPlay;
         this.itemAdd = itemPlay;
+        this.isDemoUser = isDemoUser;
     }
 
 	public int getCount() {
@@ -62,6 +64,7 @@ public class LinguooNewsCustomAdapter extends BaseAdapter {
             holder.txtItemContent = (TextView)viewList.findViewById(R.id.txtItemContent); 
             holder.thub_image = (ImageView)viewList.findViewById(R.id.imgItemNews);
             holder.btnAdd = (ToggleButton)viewList.findViewById(R.id.btnAddToPlaylist);
+            if(isDemoUser)holder.btnAdd.setVisibility(ToggleButton.INVISIBLE);
             
             viewList.setTag(holder);
         }else{

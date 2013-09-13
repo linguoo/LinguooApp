@@ -2,8 +2,6 @@ package com.mkiisoft.linguoo.player;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-
-import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityManager.RunningServiceInfo;
 import android.content.BroadcastReceiver;
@@ -17,16 +15,17 @@ public class LinguooMediaPlayer  {
 	protected static final String TAG = "Linguoo MediaPlayer";
 	private static final String mpService = "com.mkiisoft.linguoo.player.LinguooMediaPlayerService";
 	
-	private Context context;
 	private int playListIndex;
+	private int playbackStatus;
+	private int progressStatus;
 	private ArrayList<HashMap<String, String>> playList;
 	private HashMap<String, String> entry;
 	private Intent mpBroadcastIntent;
 	private IntentFilter playbackFilter;
 	private LinguooMediaPlayerInterface mpInterface;
-	private int playbackStatus;
-	private int progressStatus;
-	private Boolean autoPlay;
+	private String autoPlay;
+	private Context context;
+
 	
 	public LinguooMediaPlayer(Context c){
 		context = c;
@@ -36,12 +35,31 @@ public class LinguooMediaPlayer  {
 	
 	public void addToPlayList(int index){
 		playList.add(createEntry(LinguooNewsManager.getRecordByIndex(index)));
+		LinguooNewsManager.addSelectedIndex(index);
 		updatePlayListService();
 	}
 	
+	public void addToPlayList(String items){
+		ArrayList<Integer> itemsList = LinguooNewsManager.getSelectedItemsAsArray(items);
+		clearPlaylist();
+		
+		if(itemsList != null && itemsList.size() > 0){
+			for(int index : itemsList){
+				playList.add(createEntry(LinguooNewsManager.getRecordByIndex(index)));
+			}
+			updatePlayListService();
+		}
+	}
+
+
 	public void removeFromPlayList(int index){
 		playList.remove(createEntry(LinguooNewsManager.getRecordByIndex(index)));
+		LinguooNewsManager.removeSelectedIndex(index);
 		updatePlayListService();
+	}
+	
+	public String getSelectedIndexes(){
+		return LinguooNewsManager.getSelectedIndexesAsString();
 	}
 	
 	public int getTotal(){
@@ -60,6 +78,7 @@ public class LinguooMediaPlayer  {
 			}else{
 				sendResumePlayerService();
 			}
+			//sendResumePlayerService();
 		}		
 		
 	}
@@ -73,13 +92,12 @@ public class LinguooMediaPlayer  {
 	}
 	
 	public void moveForward(){
-		Log.d(TAG,"Current: " + playListIndex + " - Total: " + getTotal());
-		
-		entry = createEntry(playList.get(playListIndex));	
-		
-		if(playListIndex >= (getTotal() - 1))playListIndex = 0;
-		else playListIndex++;		
-		
+		if(getTotal() > 0){
+			entry = createEntry(playList.get(playListIndex));	
+			
+			if(playListIndex >= (getTotal() - 1))playListIndex = 0;
+			else playListIndex++;		
+		}
 		sendPlayPlayerService(entry);
 	}
 	
@@ -87,21 +105,29 @@ public class LinguooMediaPlayer  {
 		return playbackStatus;
 	}
 	
+	public void clearPlaylist(){
+		playList = null;
+		playList = new ArrayList<HashMap<String, String>>();
+	}
+	
 	public Boolean isPlaying(){
-		if(playbackStatus == mpInterface.ON_PLAYER_PLAYING)return true;
+		if(playbackStatus == LinguooMediaPlayerInterface.ON_PLAYER_PLAYING)return true;
 		else return false;
 	}
 
 	public void setAutoPlay(Boolean value){
-		autoPlay = value;
+		autoPlay = value.toString();
 		sendBroadcastAsString("autoPlay", autoPlay, "setAutoPlay");
+	}
+		
+	public void updatePlayerView(){
+		sendBroadcastAction("updatePlayerView");
 	}
 	
 	private void initialize(){
 		mpBroadcastIntent = new Intent();
-		playList = new ArrayList<HashMap<String, String>>();
 		mpInterface = (LinguooMediaPlayerInterface)context;	
-		
+		clearPlaylist();
 	}
 	
 	private HashMap<String, String> createEntry(HashMap<String, String> data){
@@ -131,9 +157,9 @@ public class LinguooMediaPlayer  {
         context.sendBroadcast(mpBroadcastIntent); 
 	}
 	
-	private void sendBroadcastAsString(String param, Boolean value, String action){
+	private void sendBroadcastAsString(String param, String value, String action){
 		mpBroadcastIntent.setAction(action);         
-		mpBroadcastIntent.putExtra(param, value.toString());       
+		mpBroadcastIntent.putExtra(param, value);       
         context.sendBroadcast(mpBroadcastIntent); 
 	}
 	
@@ -200,7 +226,7 @@ public class LinguooMediaPlayer  {
 	
 	public void startMediaPlayerService(){
 		if(checkIfMediaPlayerServiceIsRunning()){
-			stopMediaPlayerService();
+			//stopMediaPlayerService();
 		}
 		Intent serviceIntent = new Intent(context, LinguooMediaPlayerService.class);
 		context.startService(serviceIntent);

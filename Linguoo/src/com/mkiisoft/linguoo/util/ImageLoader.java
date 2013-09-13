@@ -24,17 +24,18 @@ import android.widget.ImageView;
 
 public class ImageLoader {
     
-    MemoryCache memoryCache=new MemoryCache();
-    FileCache fileCache;
+	private final int stub_id = R.drawable.no_image;
+	private MemoryCache memoryCache=new MemoryCache();
+	private FileCache fileCache;
     private Map<ImageView, String> imageViews=Collections.synchronizedMap(new WeakHashMap<ImageView, String>());
-    ExecutorService executorService; 
+    private ExecutorService executorService; 
     
     public ImageLoader(Context context){
         fileCache=new FileCache(context);
         executorService=Executors.newFixedThreadPool(5);
     }
     
-    final int stub_id = R.drawable.no_image;
+    
     public void DisplayImage(String url, ImageView imageView)
     {
         imageViews.put(imageView, url);
@@ -52,6 +53,10 @@ public class ImageLoader {
     {
         PhotoToLoad p=new PhotoToLoad(url, imageView);
         executorService.submit(new PhotosLoader(p));
+    }
+    
+    public Bitmap getImageAsBitmap(String url){
+    	return getBitmap(url);
     }
     
     private Bitmap getBitmap(String url) 

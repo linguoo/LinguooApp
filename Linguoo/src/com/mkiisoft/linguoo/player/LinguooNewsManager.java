@@ -1,7 +1,10 @@
 package com.mkiisoft.linguoo.player;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -15,14 +18,16 @@ public class LinguooNewsManager {
 	
 	private static JSONArray JSONData;
 	private static ArrayList<HashMap<String, String>> ArrayData;
-	
+	private static ArrayList<Integer> selectedIndex;
 	
 	public LinguooNewsManager(){
 
 	}
 	
-	public static void setData(String dataSource){
+	public static void setData(String dataSource, String selectedItems){
 		initialize(); 
+		
+		selectedIndex = getSelectedItemsAsArray(selectedItems);
 		
 		try {
 			JSONData = new JSONArray(dataSource);
@@ -33,7 +38,8 @@ public class LinguooNewsManager {
 					String value = JSONData.getJSONObject(i).getString(JSONData.getJSONObject(i).names().optString(b));
 					currentRecord.put(key,value);
 				}
-				currentRecord.put(Constants.NEWS_ONPLAYLIST, "false");
+				Boolean added = checkIfItemIsSelected(i);
+				currentRecord.put(Constants.NEWS_ONPLAYLIST, added.toString());
 				ArrayData.add(currentRecord);
 			}
 		} catch (JSONException e) {
@@ -120,6 +126,50 @@ public class LinguooNewsManager {
 
 	}
 	
+	public static void addSelectedIndex(int index){
+		selectedIndex.add(index);
+	}
+	
+	public static void removeSelectedIndex(int index){
+		if(selectedIndex.size() > 0){
+			for(int i=0; i < selectedIndex.size(); i++){
+				if(index == selectedIndex.get(i)){
+					selectedIndex.remove(i);
+				}
+			}
+		}
+	}
+	
+	public static ArrayList<Integer> getSelectedIndexes(){
+		return selectedIndex;
+	}	
+	
+	public static void updateSelectedIndexes(ArrayList<Integer> updatedIndexes){
+		selectedIndex = updatedIndexes;
+	}
+	
+	public static String getSelectedIndexesAsString(){
+		String indexes = "";
+		if(selectedIndex.size() > 0){
+			for(int index : selectedIndex){
+				indexes += index + ",";
+			}
+			indexes = indexes.substring(0, indexes.length() - 1);
+		}
+		return indexes;
+	}
+	
+	public static ArrayList<Integer> getSelectedItemsAsArray(String items){
+		selectedIndex = new ArrayList<Integer>();
+		if(items != null && !items.equals("")){
+			String[] listItems = items.split(",");
+			if(listItems.length > 0 ){
+				for(String item  : listItems)selectedIndex.add(Integer.parseInt(item));
+			}
+		}		
+		return selectedIndex;			
+	}
+	
 	private static int getValueAsInteger(int index, String tag){
 		if(getRecordByIndex(index) == null)return -1;
 		else{
@@ -134,5 +184,14 @@ public class LinguooNewsManager {
 		}
 	}	
 	
-	
+	private static Boolean checkIfItemIsSelected(int index){
+		if(selectedIndex.size() > 0){
+			for(int i=0; i < selectedIndex.size(); i++){
+				if(index == selectedIndex.get(i)){
+					return true;
+				}
+			}
+		}
+		return false;		
+	}	
 }

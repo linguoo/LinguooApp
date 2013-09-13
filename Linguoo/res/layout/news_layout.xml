@@ -21,7 +21,7 @@
             android:layout_centerVertical="true"
             android:layout_marginLeft="10dp"
             android:contentDescription="@string/null_content_desc"
-            android:src="@drawable/logo" />
+            android:src="@drawable/logo_linguoo" />
 
         <ImageButton
             android:id="@+id/btnUser"
@@ -41,7 +41,7 @@
             android:src="@drawable/btn_user" />
 
         <ImageButton
-            android:id="@+id/btnAutoPlay"
+            android:id="@+id/btnConfig"
             android:layout_width="40dp"
             android:layout_height="40dp"
             android:layout_centerInParent="true"
@@ -52,23 +52,23 @@
             android:paddingLeft="5dp"
             android:paddingRight="5dp"
             android:scaleType="fitCenter"
-            android:src="@drawable/btn_auto_off" />
+            android:src="@drawable/btn_conf" />
 
         <ImageButton
-            android:id="@+id/btnConfig"
+            android:id="@+id/btnAutoPlay"
             android:layout_width="40dp"
             android:layout_height="40dp"
             android:layout_centerInParent="true"
             android:layout_centerVertical="true"
             android:layout_marginLeft="30dp"
             android:layout_marginRight="5dp"
-            android:layout_toLeftOf="@id/btnAutoPlay"
+            android:layout_toLeftOf="@id/btnConfig"
             android:background="@color/white"
             android:contentDescription="@string/null_content_desc"
             android:paddingLeft="5dp"
             android:paddingRight="5dp"
             android:scaleType="fitCenter"
-            android:src="@drawable/btn_conf" />
+            android:src="@drawable/btn_auto_off" />
 
     </RelativeLayout>
 

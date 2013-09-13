@@ -3,13 +3,17 @@ package com.mkiisoft.linguoo.player;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashMap;
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.net.Uri;
+import android.os.Build;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewTreeObserver;
 import android.view.View.OnClickListener;
 import android.view.View.OnTouchListener;
+import android.view.ViewTreeObserver.OnGlobalLayoutListener;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
@@ -64,6 +68,9 @@ public class LinguooUIManager implements OnClickListener{
 	private Boolean controlsReady = false;
 	private ImageLoader imageLoader;
 	private Boolean btnAutoPlayEnabled = false;
+	private Boolean isDemoUser = false;
+	private Boolean isUILoaded = false;
+	
 	
 	@Override
 	public void onClick(View v) {
@@ -109,6 +116,7 @@ public class LinguooUIManager implements OnClickListener{
 	}
 	
 	public void setPlaying(Boolean playing){
+		btnPlayPause.setEnabled(true);
 		if(playing){
 			btnPlayPause.setBackgroundResource(R.drawable.btn_pause_on);
 			btnPlayPause.setChecked(true);
@@ -160,8 +168,50 @@ public class LinguooUIManager implements OnClickListener{
 			controlsReady = true;
 		}
 	}
+	
+	public void enablePlayButton(){
+		btnPlayPause.setEnabled(true);
+		btnPlayPause.setClickable(true);
+		btnPlayPause.setBackgroundResource(R.drawable.btn_play_on);
+	}
+	
+	public void setAsPaused(){
+		btnPlayPause.setEnabled(true);
+		btnPlayPause.setClickable(true);
+		btnPlayPause.setChecked(true);
+		btnPlayPause.setBackgroundResource(R.drawable.btn_pause_on);
+	}
+	
+	public void disablePlayButton(){
+		btnPlayPause.setEnabled(false);
+		btnPlayPause.setClickable(false);
+		btnPlayPause.setBackgroundResource(R.drawable.btn_play_off);
+	}
 
+	public void enableForwardButton(){
+		btnNextNews.setEnabled(true);
+		btnNextNews.setClickable(true);
+		btnNextNews.setBackgroundResource(R.drawable.btn_ff_on);
+	}
+	
+	public void disableForwardButton(){
+		btnNextNews.setEnabled(false);
+		btnNextNews.setClickable(false);
+		btnNextNews.setBackgroundResource(R.drawable.btn_ff_off);
+	}
+	
+	public void setAutoplayButtonAsON(){
+		btnAutoPlay.setImageResource(R.drawable.btn_auto_on);
+		btnAutoPlayEnabled = true;
+	}
+	
+	public void setAutoplayButtonAsOFF(){
+		btnAutoPlay.setImageResource(R.drawable.btn_auto_off);
+		btnAutoPlayEnabled = false;
+	}
+	
 	private void defineComponents(){
+		ViewTreeObserver viewTreeObserver;
 		newsFooterLayout = (RelativeLayout) activity.findViewById(R.id.newsFooterLayout);
 		newsImageHeaderLayout = (FrameLayout) activity.findViewById(R.id.newsImageHeaderLayout);
 				
@@ -181,15 +231,39 @@ public class LinguooUIManager implements OnClickListener{
 		progressbar = (ProgressBar) activity.findViewById(R.id.progressbar);
 		txtCurrentNewsTitle = (TextView) activity.findViewById(R.id.txtCurrentNewsTitle);
 		
+		if(isDemoUser){
+			btnAddCategory.setVisibility(ImageButton.INVISIBLE);
+			btnAutoPlay.setVisibility(ImageButton.INVISIBLE);
+		}
 		disablePlayerControls();		
-		sendToHandler(LinguooUIManagerInterface.UI_SHOW_MAIN_VIEW, 0);
+		viewTreeObserver = txtCurrentNewsTitle.getViewTreeObserver();
+		
+		if(viewTreeObserver.isAlive()){
+			OnGlobalLayoutListener ogl = new OnGlobalLayoutListener(){
+				@Override
+				public void onGlobalLayout() {
+					// TODO Auto-generated method stub
+					if(!isUILoaded){
+						isUILoaded = true;
+						sendToHandler(LinguooUIManagerInterface.UI_SHOW_MAIN_VIEW,0);
+					}					
+				}
+			};			
+			viewTreeObserver.addOnGlobalLayoutListener(ogl);		
+		}
+		
+		
 	}
 	
-	public void showList(String dataSource){
-		LinguooNewsManager.setData(dataSource);
+	public void showList(String dataSource, String selectedItems){
+		LinguooNewsManager.setData(dataSource, selectedItems);
 		data = LinguooNewsManager.getDataAsArrayList();
-		listAdapter = new LinguooNewsCustomAdapter(activity, itemLayout, data, this);
+		listAdapter = new LinguooNewsCustomAdapter(activity, itemLayout, data, this, isDemoUser);
 		newsList.setAdapter(listAdapter);
+	}
+	
+	public void setAsDemo(Boolean isDemo){
+		isDemoUser = isDemo;
 	}
 
 	private void addRemoveNews(View v){
@@ -245,8 +319,7 @@ public class LinguooUIManager implements OnClickListener{
 						break;
 				}
 				return false;
-			}
-		
+			}		
 		});
 		
 		btnAutoPlay.setOnTouchListener(new OnTouchListener(){
