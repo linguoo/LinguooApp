@@ -226,7 +226,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentStart="false"
-            android:indeterminateDrawable="@drawable/rotation_progressbar" />
+            android:indeterminateDrawable="@drawable/rotation_progressbar"
+            android:visibility="gone" />
 
     </LinearLayout>
 
