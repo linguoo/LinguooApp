@@ -465,8 +465,7 @@ public class LinguooNewsActivity extends Activity implements ConnectionListener,
 		String newsTitle = mediaPlayer.getNewsTitle();
 		String newsImage = mediaPlayer.getNewsImage();		
 	    Session session = Session.getActiveSession();
-	    Log.d(TAG,"SHAREAR: " + session.toString());
-	    
+
 	    if (session != null && session.isOpened() && !session.isClosed()){
 	    	uiManager.disableFacebookButton();
 	        Bundle postParams = new Bundle();
