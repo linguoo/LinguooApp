@@ -465,7 +465,6 @@ public class LinguooNewsActivity extends Activity implements ConnectionListener,
 		String newsTitle = mediaPlayer.getNewsTitle();
 		String newsImage = mediaPlayer.getNewsImage();		
 	    Session session = Session.getActiveSession();
-
 	    if (session != null && session.isOpened() && !session.isClosed()){
 	    	uiManager.disableFacebookButton();
 	        Bundle postParams = new Bundle();
@@ -479,14 +478,12 @@ public class LinguooNewsActivity extends Activity implements ConnectionListener,
 				@Override
 				public void onCompleted(Response response) {
 					// TODO Auto-generated method stub
-					if(response != null){
+					if(response != null && response.getGraphObject() != null){						
 						JSONObject graphResponse = response.getGraphObject().getInnerJSONObject();
 						String postId = null;
 						try {
 							postId = graphResponse.getString("id");
 						} catch (JSONException e) {
-						    Log.i(TAG,"JSON error "+ e.getMessage());
-						    uiManager.enableFacebookButton();
 						}
 						FacebookRequestError error = response.getError();
 						if (error != null) {
@@ -494,13 +491,18 @@ public class LinguooNewsActivity extends Activity implements ConnectionListener,
 						} else {
 							Toast.makeText(LinguooNewsActivity.this.getApplicationContext(),"La noticia fue publicada exitosamente en tu muro.",Toast.LENGTH_LONG).show();
 						}
-						uiManager.enableFacebookButton();
+					}else{
+						Toast.makeText(LinguooNewsActivity.this.getApplicationContext(),"No se ha podido publicar la noticia en tu muro. Intenta más tarde",Toast.LENGTH_SHORT).show();
 					}
+					uiManager.enableFacebookButton();
 				}	 
 			};
-			Request request = new Request(session, "me/feed", postParams, HttpMethod.POST, callback);
-	        RequestAsyncTask task = new RequestAsyncTask(request);
-	        task.execute();
+			
+			if(newsTitle != null){
+				Request request = new Request(session, "me/feed", postParams, HttpMethod.POST, callback);
+				RequestAsyncTask task = new RequestAsyncTask(request);
+				task.execute();
+			}
 	    }
 	}	
 	
