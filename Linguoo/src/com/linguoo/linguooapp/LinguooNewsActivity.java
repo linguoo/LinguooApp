@@ -1,19 +1,20 @@
 package com.linguoo.linguooapp;
 
-import android.app.Activity;
-import android.app.AlertDialog;
-import android.content.Context;
-import android.content.DialogInterface;
-import android.content.DialogInterface.OnClickListener;
-import android.content.Intent;
-import android.content.res.Configuration;
-import android.os.Bundle;
-import android.text.SpannableString;
-import android.text.util.Linkify;
-import android.util.Log;
-import android.view.ViewTreeObserver;
-import android.widget.Toast;
-
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.Arrays;
+import org.json.JSONException;
+import org.json.JSONObject;
+import com.facebook.FacebookRequestError;
+import com.facebook.HttpMethod;
+import com.facebook.LoggingBehavior;
+import com.facebook.Request;
+import com.facebook.RequestAsyncTask;
+import com.facebook.Response;
+import com.facebook.Session;
+import com.facebook.SessionState;
+import com.facebook.Settings;
+import com.linguoo.linguooapp.R;
 import com.linguoo.linguooapp.async.AsyncConnection;
 import com.linguoo.linguooapp.async.ConnectionListener;
 import com.linguoo.linguooapp.player.LinguooMediaPlayer;
@@ -22,7 +23,23 @@ import com.linguoo.linguooapp.player.LinguooUIManager;
 import com.linguoo.linguooapp.player.LinguooUIManagerInterface;
 import com.linguoo.linguooapp.util.Constants;
 import com.linguoo.linguooapp.util.KeySaver;
-
+import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.content.DialogInterface.OnClickListener;
+import android.content.Intent;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.NameNotFoundException;
+import android.content.pm.Signature;
+import android.content.res.Configuration;
+import android.os.Bundle;
+import android.text.SpannableString;
+import android.text.util.Linkify;
+import android.util.Base64;
+import android.util.Log;
+import android.widget.Toast;
 
 public class LinguooNewsActivity extends Activity implements ConnectionListener, LinguooUIManagerInterface, LinguooMediaPlayerInterface{
 	protected static final String TAG = "Linguoo Noticias";
@@ -33,7 +50,8 @@ public class LinguooNewsActivity extends Activity implements ConnectionListener,
 	private String usuLog; //Token del usuario
 	private String usuCod; //Nombre de usuario
 	private Boolean isDemoUser = false;
-
+	private Session.StatusCallback statusCallback = new SessionStatusCallback();
+	
 	@Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -42,11 +60,19 @@ public class LinguooNewsActivity extends Activity implements ConnectionListener,
         setAsDemo();
         createUI();
         setMainView();
-	}
+        facebookStart(savedInstanceState);
+    }
+	
 	
 	@Override
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
+    }
+	
+	@Override
+    public void onStart() {
+        super.onStart();
+        Session.getActiveSession().addCallback(statusCallback);
     }
 	
 	@Override
@@ -80,6 +106,40 @@ public class LinguooNewsActivity extends Activity implements ConnectionListener,
         setState();
     }
 
+	@Override
+	public void onActivityResult(int requestCode, int resultCode, Intent data) {
+		super.onActivityResult(requestCode, resultCode, data);
+        Session.getActiveSession().onActivityResult(this, requestCode, resultCode, data);
+		if (requestCode == Constants.CATEG) {			
+			if(resultCode == Constants.CATCHG){      
+		         /*las categorías han cambiado, detener el reproductor, limpiar el playlist
+		    	 * y volver a listar las noticias
+		    	 */
+				KeySaver.saveShare(LinguooNewsActivity.this, "noChangesCategory", false);
+				KeySaver.saveShare(LinguooNewsActivity.this, "selectedItems", "");
+				mediaPlayer.restartPlayer();
+				uiManager.refreshLayout();				
+				sendNewsRequest();
+		    }
+		    if (resultCode == Constants.CATUCHG) {    
+		         /*
+		          * No se modificó ninguna categoría, todo sigue igual
+		          * Borrar si no es necesario ejecutar ninguna acción
+		          */
+		    	KeySaver.saveShare(LinguooNewsActivity.this, "noChangesCategory", true);
+		    	prepareData(null);
+		    }		    
+		    mediaPlayer.updatePlayerView();
+		}
+	}
+	
+	@Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        Session session = Session.getActiveSession();
+        Session.saveSession(session, outState);
+    }
+	
 	@Override
 	public void ready(int msg, String message) {
 		// TODO Auto-generated method stub
@@ -115,8 +175,13 @@ public class LinguooNewsActivity extends Activity implements ConnectionListener,
 	}
 	
 	@Override
+	public void playerNewsInformation(String title, String content, String image, String author, String url) {
+		// TODO Auto-generated method stub
+		
+	}
+	
+	@Override
 	public void playerStatusHandler(int status) {
-		Log.d(TAG,"Status: "  + status);
 		// TODO Auto-generated method stub
 		uiManager.hideAudioLoader();
 		switch(status){
@@ -274,10 +339,40 @@ public class LinguooNewsActivity extends Activity implements ConnectionListener,
 			case UI_MOVE_FORWARD:
 				mediaPlayer.moveForward();
 				break;
+			case UI_FACEBOOK_SHARE:
+				Session session = Session.getActiveSession();
+		        if (!session.isOpened() && !session.isClosed()) {
+		            session.openForRead(new Session.OpenRequest(this).setCallback(statusCallback));
+		        } else {
+		            Session.openActiveSession(this, true, statusCallback);
+		        }		
+				break;
+			case UI_GOOGLE_SHARE:
+				/*
+				 * IMPLEMENTAR AQUÍ LA API DE GOOGLE PARA COMPARTIR LA NOTICIA
+				 * 
+				 * 
+				 */
+				break;
+			case UI_TWITTER_SHARE:
+				/*
+				 * IMPLEMENTAR AQUÍ LA API DE TWITTER PARA COMPARTIR LA NOTICIA
+				 * 
+				 * 
+				 */
+				break;
 		}
 	}
 	
 	/********************************************************************************************************/	
+	
+	public static boolean isNewsActivityIsOpen() {
+		return newsActivityIsOpen;
+	}
+
+	public static void setNewsActivityIsOpen(boolean newsActivityIsOpen) {
+		LinguooNewsActivity.newsActivityIsOpen = newsActivityIsOpen;
+	}
 	
 	private void sendNewsRequest(){
 		uiManager.showLoader();
@@ -336,38 +431,79 @@ public class LinguooNewsActivity extends Activity implements ConnectionListener,
 		KeySaver.saveShare(LinguooNewsActivity.this, "noChangesCategory", false);
 		KeySaver.saveShare(LinguooNewsActivity.this, "state", Constants.MAIN);
 	}
+		
+	private void facebookStart(Bundle savedInstanceState){
+		// TODO Auto-generated method stub        
+        Settings.addLoggingBehavior(LoggingBehavior.INCLUDE_ACCESS_TOKENS);
+		Session session = Session.getActiveSession();
+        if (session == null){
+            if (savedInstanceState != null){
+                session = Session.restoreSession(this, null, statusCallback, savedInstanceState);
+            }
+            if (session == null){
+                session = new Session(this);
+            }
+            Session.setActiveSession(session);
+            if (session.getState().equals(SessionState.CREATED_TOKEN_LOADED)){
+                session.openForRead(new Session.OpenRequest(this).setCallback(statusCallback));
+            }
+        }
+        
+        /*try {
+            PackageInfo info = getPackageManager().getPackageInfo("com.linguoo.linguooapp", PackageManager.GET_SIGNATURES);
+            for (Signature signature : info.signatures){
+                   MessageDigest md = MessageDigest.getInstance("SHA");
+                   md.update(signature.toByteArray());
+                   Log.d("KeyHash:", Base64.encodeToString(md.digest(), Base64.DEFAULT));
+            }
+        } catch (NameNotFoundException e) {
+        } catch (NoSuchAlgorithmException e) {
+        }*/
+	}
 	
-	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-		if (requestCode == Constants.CATEG) {			
-			if(resultCode == Constants.CATCHG){      
-		         /*las categorías han cambiado, detener el reproductor, limpiar el playlist
-		    	 * y volver a listar las noticias
-		    	 */
-				KeySaver.saveShare(LinguooNewsActivity.this, "noChangesCategory", false);
-				KeySaver.saveShare(LinguooNewsActivity.this, "selectedItems", "");
-				mediaPlayer.restartPlayer();
-				uiManager.refreshLayout();				
-				sendNewsRequest();
-		    }
-		    if (resultCode == Constants.CATUCHG) {    
-		         /*
-		          * No se modificó ninguna categoría, todo sigue igual
-		          * Borrar si no es necesario ejecutar ninguna acción
-		          */
-		    	KeySaver.saveShare(LinguooNewsActivity.this, "noChangesCategory", true);
-		    	prepareData(null);
-		    }		    
-		    mediaPlayer.updatePlayerView();
-		}
-	}
+	private void publishNewsOnFacebook() {
+		String newsTitle = mediaPlayer.getNewsTitle();
+		String newsImage = mediaPlayer.getNewsImage();		
+	    Session session = Session.getActiveSession();
+	    Log.d(TAG,"SHAREAR: " + session.toString());
+	    
+	    if (session != null && session.isOpened() && !session.isClosed()){
+	    	uiManager.disableFacebookButton();
+	        Bundle postParams = new Bundle();
+	        postParams.putString("name", newsTitle);
+	        postParams.putString("caption", newsTitle);
+	        postParams.putString("description", newsTitle);
+	        postParams.putString("link", "http://www.linguoo.com.ar");
+	        postParams.putString("picture", newsImage);
 
-	public static boolean isNewsActivityIsOpen() {
-		return newsActivityIsOpen;
-	}
-
-	public static void setNewsActivityIsOpen(boolean newsActivityIsOpen) {
-		LinguooNewsActivity.newsActivityIsOpen = newsActivityIsOpen;
-	}
+	        Request.Callback callback= new Request.Callback() {
+				@Override
+				public void onCompleted(Response response) {
+					// TODO Auto-generated method stub
+					if(response != null){
+						JSONObject graphResponse = response.getGraphObject().getInnerJSONObject();
+						String postId = null;
+						try {
+							postId = graphResponse.getString("id");
+						} catch (JSONException e) {
+						    Log.i(TAG,"JSON error "+ e.getMessage());
+						    uiManager.enableFacebookButton();
+						}
+						FacebookRequestError error = response.getError();
+						if (error != null) {
+						    Toast.makeText(LinguooNewsActivity.this.getApplicationContext(),"No se ha podido publicar la noticia en tu muro. Intenta más tarde",Toast.LENGTH_SHORT).show();
+						} else {
+							Toast.makeText(LinguooNewsActivity.this.getApplicationContext(),"La noticia fue publicada exitosamente en tu muro.",Toast.LENGTH_LONG).show();
+						}
+						uiManager.enableFacebookButton();
+					}
+				}	 
+			};
+			Request request = new Request(session, "me/feed", postParams, HttpMethod.POST, callback);
+	        RequestAsyncTask task = new RequestAsyncTask(request);
+	        task.execute();
+	    }
+	}	
 	
 	/********************************************************************************************************/
 	
@@ -385,5 +521,22 @@ public class LinguooNewsActivity extends Activity implements ConnectionListener,
 		AlertDialog alert = builder.create();
 		alert.show();
 	}	
-
+	
+	private class SessionStatusCallback implements Session.StatusCallback {
+        @Override
+        public void call(Session session, SessionState state, Exception exception) {
+        	if (session.isOpened()) {
+        		if(state == SessionState.OPENED || state == SessionState.OPENED_TOKEN_UPDATED) {
+                    if(session.getPermissions().contains("publish_actions")) {
+                        publishNewsOnFacebook();
+                    } else {
+                        Session.NewPermissionsRequest newPermissionsRequest = new Session.NewPermissionsRequest(LinguooNewsActivity.this, Arrays.asList("publish_actions"));
+                        session.requestNewPublishPermissions(newPermissionsRequest);
+                    }
+                }
+        	}
+        }
+    }
+	
+	
 }

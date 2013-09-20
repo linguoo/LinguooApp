@@ -18,7 +18,8 @@
         android:textColor="#040404"
         android:textSize="12sp"
         android:textStyle="bold"
-        android:typeface="sans" />
+        android:typeface="sans" 
+        android:singleLine="true" />
 
     <LinearLayout
         android:id="@+id/newsThumb"

@@ -1,12 +1,14 @@
 package com.linguoo.linguooapp.player;
 
-import java.net.URI;
+import com.facebook.widget.LoginButton;
+import com.linguoo.linguooapp.R;
+import com.linguoo.linguooapp.player.LinguooUIManagerInterface;
+import com.linguoo.linguooapp.player.LinguooNewsCustomAdapter.itemHolder;
+import com.linguoo.linguooapp.util.ImageLoader;
+
 import java.util.ArrayList;
 import java.util.HashMap;
-import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.net.Uri;
-import android.os.Build;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
@@ -18,18 +20,12 @@ import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
-import android.widget.RelativeLayout.LayoutParams;
 import android.widget.TextView;
 import android.widget.ToggleButton;
-
-import com.linguoo.linguooapp.R;
-import com.linguoo.linguooapp.player.LinguooNewsCustomAdapter.itemHolder;
-import com.linguoo.linguooapp.player.LinguooUIManagerInterface;
-import com.linguoo.linguooapp.util.Constants;
-import com.linguoo.linguooapp.util.ImageLoader;
 
 public class LinguooUIManager implements OnClickListener{
 	protected static final String TAG = "Linguoo UI Manager";
@@ -44,6 +40,11 @@ public class LinguooUIManager implements OnClickListener{
 	private ImageButton btnConfig;
 	private ImageButton btnAutoPlay;
 	private ImageButton btnUser;
+	private Button btn_facebook_share;
+	private Button btn_google_share;
+	private Button btn_twitter_share;
+	private LinearLayout socialLayout;
+	private ProgressBar socialLoader;
 	
 	/* Declaración de todos los controles y objetos del contenedor de imagen de la noticia actual */
 	private FrameLayout newsImageHeaderLayout;
@@ -125,12 +126,30 @@ public class LinguooUIManager implements OnClickListener{
 		}
 	}
 	
-	public void setNewsTitleAndImage(String title, String image){		
+	public void setNewsTitleAndImage(String title, String image){
 		if(title != null)txtCurrentNewsTitle.setText(title);
-		else txtCurrentNewsTitle.setText("");
+		else txtCurrentNewsTitle.setText("");	
 		
 		if(image != null)imageLoader.DisplayImage(image, imgNews);
 		else imgNews.setImageResource(R.drawable.logo_sample);
+		
+		showSocialLayout();
+	}
+	
+	public void showSocialLayout(){
+		socialLayout.setVisibility(LinearLayout.VISIBLE);
+	}
+	
+	public void hideSocialLayout(){
+		socialLayout.setVisibility(LinearLayout.INVISIBLE);
+	}
+	
+	public void enableFacebookButton(){
+		btn_facebook_share.setEnabled(true);
+	}
+	
+	public void disableFacebookButton(){
+		btn_facebook_share.setEnabled(false);
 	}
 	
 	public void updateProgressBar(int value){
@@ -238,7 +257,11 @@ public class LinguooUIManager implements OnClickListener{
 		ViewTreeObserver viewTreeObserver;
 		newsFooterLayout = (RelativeLayout) activity.findViewById(R.id.newsFooterLayout);
 		newsImageHeaderLayout = (FrameLayout) activity.findViewById(R.id.newsImageHeaderLayout);
-				
+		socialLayout = (LinearLayout) activity.findViewById(R.id.socialLayout);
+		btn_facebook_share = (Button) activity.findViewById(R.id.btn_facebook_share);
+		btn_google_share = (Button) activity.findViewById(R.id.btn_google_share);
+		btn_twitter_share = (Button) activity.findViewById(R.id.btn_twitter_share);
+		
 		btnConfig = (ImageButton) activity.findViewById(R.id.btnConfig);
 		btnAutoPlay = (ImageButton) activity.findViewById(R.id.btnAutoPlay);
 		btnUser = (ImageButton) activity.findViewById(R.id.btnUser);
@@ -259,7 +282,8 @@ public class LinguooUIManager implements OnClickListener{
 			btnAddCategory.setVisibility(ImageButton.INVISIBLE);
 			btnAutoPlay.setVisibility(ImageButton.INVISIBLE);
 		}
-		disablePlayerControls();		
+		disablePlayerControls();
+		hideSocialLayout();
 		viewTreeObserver = txtCurrentNewsTitle.getViewTreeObserver();
 		
 		if(viewTreeObserver.isAlive()){
@@ -292,6 +316,7 @@ public class LinguooUIManager implements OnClickListener{
 		listAdapter.notifyDataSetChanged();
 		disablePlayerControls();
 		setNewsTitleAndImage(null, null);
+		hideSocialLayout();
 	}
 	
 	public void setAsDemo(Boolean isDemo){
@@ -445,6 +470,36 @@ public class LinguooUIManager implements OnClickListener{
 			
 		});
 
+		btn_facebook_share.setOnClickListener(new OnClickListener(){
+
+			@Override
+			public void onClick(View v) {
+				// TODO Auto-generated method stub
+				sendToHandler(LinguooUIManagerInterface.UI_FACEBOOK_SHARE,0);
+			}
+			
+		});
+		
+		btn_google_share.setOnClickListener(new OnClickListener(){
+
+			@Override
+			public void onClick(View v) {
+				// TODO Auto-generated method stub
+				sendToHandler(LinguooUIManagerInterface.UI_GOOGLE_SHARE,0);
+			}
+			
+		});
+		
+		btn_twitter_share.setOnClickListener(new OnClickListener(){
+
+			@Override
+			public void onClick(View v) {
+				// TODO Auto-generated method stub
+				sendToHandler(LinguooUIManagerInterface.UI_TWITTER_SHARE,0);
+			}
+			
+		});
+		
 	}
 	
 }

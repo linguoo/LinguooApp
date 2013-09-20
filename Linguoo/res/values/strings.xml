@@ -8,7 +8,7 @@
     <string name="accept">Aceptar</string>
     <string name="decline">Declinar</string>
     <string name="eula_text">Hola, y bienvenido a nuestros Términos y Condiciones de Uso. Son importantes y afectan a tus derechos, por lo que te rogamos que los leas detenidamente junto con nuestra Política de Privacidad. Esperamos que te encuentres cómodamente sentado. Vamos allá… </string>
-       <string name="current_news_title">Current News</string>
+    <string name="current_news_title">Current News</string>
     <string name="null_content_desc"></string>
-    
+    <string name="app_id">1416221908604778</string>
 </resources>

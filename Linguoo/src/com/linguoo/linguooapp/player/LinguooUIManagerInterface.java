@@ -13,6 +13,9 @@ public interface LinguooUIManagerInterface {
 	public static final int UI_PLAY = 9;
 	public static final int UI_PAUSE = 10;
 	public static final int UI_MOVE_FORWARD = 11;
+	public static final int UI_FACEBOOK_SHARE = 12;
+	public static final int UI_GOOGLE_SHARE = 13;
+	public static final int UI_TWITTER_SHARE = 14;
 	
 	public void UIStatusHandler(int status, int value);
 }

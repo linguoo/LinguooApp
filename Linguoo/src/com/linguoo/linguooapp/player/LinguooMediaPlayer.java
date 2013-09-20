@@ -26,6 +26,8 @@ public class LinguooMediaPlayer  {
 	private LinguooMediaPlayerInterface mpInterface;
 	private String autoPlay;
 	private Context context;
+	private String newsTitle;
+	private String newsImage;
 	
 	public LinguooMediaPlayer(Context c){
 		context = c;
@@ -136,6 +138,14 @@ public class LinguooMediaPlayer  {
 		
 	public void updatePlayerView(){
 		sendBroadcastAction("updatePlayerView");
+	}
+	
+	public String getNewsTitle(){
+		return newsTitle;
+	}
+	
+	public String getNewsImage(){
+		return newsImage;
 	}
 	
 	private void initialize(){
@@ -278,7 +288,9 @@ public class LinguooMediaPlayer  {
 				mpInterface.playerProgressHandler(progressStatus);
 			}
 			if(bufferIntent.getAction().equals("playbackTitle")){
-				mpInterface.playerTitleHandler(bufferIntent.getStringExtra("title"),bufferIntent.getStringExtra("image"));
+				newsTitle = bufferIntent.getStringExtra("title");
+				newsImage = bufferIntent.getStringExtra("image");
+				mpInterface.playerTitleHandler(newsTitle,newsImage);
 			}
 		}
 	};

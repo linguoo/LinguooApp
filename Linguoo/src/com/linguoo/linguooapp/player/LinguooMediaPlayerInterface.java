@@ -20,4 +20,5 @@ public interface LinguooMediaPlayerInterface {
 	public void playerStatusHandler(int status);
 	public void playerProgressHandler(int value);
 	public void playerTitleHandler(String title, String image);
+	public void playerNewsInformation(String title, String content, String image, String author, String url);
 }
