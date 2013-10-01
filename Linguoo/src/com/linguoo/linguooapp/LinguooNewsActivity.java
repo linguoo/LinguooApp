@@ -1,7 +1,5 @@
 package com.linguoo.linguooapp;
 
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -17,6 +15,7 @@ import com.facebook.Settings;
 import com.linguoo.linguooapp.R;
 import com.linguoo.linguooapp.async.AsyncConnection;
 import com.linguoo.linguooapp.async.ConnectionListener;
+import com.linguoo.linguooapp.async.Utils;
 import com.linguoo.linguooapp.player.LinguooMediaPlayer;
 import com.linguoo.linguooapp.player.LinguooMediaPlayerInterface;
 import com.linguoo.linguooapp.player.LinguooUIManager;
@@ -29,15 +28,10 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
-import android.content.pm.PackageManager.NameNotFoundException;
-import android.content.pm.Signature;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.text.SpannableString;
 import android.text.util.Linkify;
-import android.util.Base64;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -60,7 +54,10 @@ public class LinguooNewsActivity extends Activity implements ConnectionListener,
         setAsDemo();
         createUI();
         setMainView();
-        facebookStart(savedInstanceState);
+        if(isFacebookInstalled())
+        	facebookStart(savedInstanceState);
+
+        
     }
 	
 	
@@ -72,7 +69,8 @@ public class LinguooNewsActivity extends Activity implements ConnectionListener,
 	@Override
     public void onStart() {
         super.onStart();
-        Session.getActiveSession().addCallback(statusCallback);
+        if(isFacebookInstalled())
+        	Session.getActiveSession().addCallback(statusCallback);
     }
 	
 	@Override
@@ -109,26 +107,42 @@ public class LinguooNewsActivity extends Activity implements ConnectionListener,
 	@Override
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
-        Session.getActiveSession().onActivityResult(this, requestCode, resultCode, data);
-		if (requestCode == Constants.CATEG) {			
-			if(resultCode == Constants.CATCHG){      
-		         /*las categorías han cambiado, detener el reproductor, limpiar el playlist
-		    	 * y volver a listar las noticias
-		    	 */
-				KeySaver.saveShare(LinguooNewsActivity.this, "noChangesCategory", false);
-				KeySaver.saveShare(LinguooNewsActivity.this, "selectedItems", "");
-				mediaPlayer.restartPlayer();
-				uiManager.refreshLayout();				
-				sendNewsRequest();
-		    }
-		    if (resultCode == Constants.CATUCHG) {    
-		         /*
-		          * No se modificó ninguna categoría, todo sigue igual
-		          * Borrar si no es necesario ejecutar ninguna acción
-		          */
-		    	KeySaver.saveShare(LinguooNewsActivity.this, "noChangesCategory", true);
-		    	prepareData(null);
-		    }		    
+        if(isFacebookInstalled())
+        	Session.getActiveSession().onActivityResult(this, requestCode, resultCode, data);
+        
+		if (requestCode == Constants.CATEG) {
+			Log.d(TAG, "EL STATUS ES: " + resultCode + " - EL REQUEST ES: " + requestCode);
+			switch(resultCode){
+				case Constants.CATCHG:
+					 /*las categorías han cambiado, detener el reproductor, limpiar el playlist
+			    	 * y volver a listar las noticias
+			    	 */
+					KeySaver.saveShare(LinguooNewsActivity.this, "noChangesCategory", false);
+					KeySaver.saveShare(LinguooNewsActivity.this, "selectedItems", "");
+					mediaPlayer.restartPlayer();
+					uiManager.refreshLayout();				
+					sendNewsRequest();
+					break;
+					
+				case Constants.CATUCHG:
+					 /*
+			          * No se modificó ninguna categoría, todo sigue igual
+			          * Borrar si no es necesario ejecutar ninguna acción
+			          */
+			    	KeySaver.saveShare(LinguooNewsActivity.this, "noChangesCategory", true);
+			    	prepareData(null);
+					break;
+				
+				case Constants.CATFIN:
+					/*
+					 * El usuario presionó el backButton. Finaliza la activity.
+					 * 
+					 */
+					Log.d(TAG,"PRESIONÓ BACKBUTTON");
+					finish();
+					break;
+			}
+		    
 		    mediaPlayer.updatePlayerView();
 		}
 	}
@@ -259,6 +273,7 @@ public class LinguooNewsActivity extends Activity implements ConnectionListener,
 				if(mediaPlayer.getTotal() == 0)uiManager.disableForwardButton();
 				break;
 			case UI_ITEM_SELECTED:
+				uiManager.enableFacebookButton();
 				if(mediaPlayer.isCallAttached()){
 					Toast.makeText(this,"Tienes una llamada en curso. Intenta Luego.",Toast.LENGTH_LONG).show();
 				}else{
@@ -333,19 +348,33 @@ public class LinguooNewsActivity extends Activity implements ConnectionListener,
 					Toast.makeText(this,"Tienes una llamada en curso. Intenta Luego.",Toast.LENGTH_LONG).show();
 				}else{
 					mediaPlayer.pause();
-				}
-				
+				}				
 				break;
 			case UI_MOVE_FORWARD:
 				mediaPlayer.moveForward();
 				break;
 			case UI_FACEBOOK_SHARE:
-				Session session = Session.getActiveSession();
-		        if (!session.isOpened() && !session.isClosed()) {
-		            session.openForRead(new Session.OpenRequest(this).setCallback(statusCallback));
-		        } else {
-		            Session.openActiveSession(this, true, statusCallback);
-		        }		
+				if(isFacebookInstalled()){
+					Session session = Session.getActiveSession();
+			        if (!session.isOpened() && !session.isClosed()) {
+			            session.openForRead(new Session.OpenRequest(this).setCallback(statusCallback));
+			        } else {
+			            Session.openActiveSession(this, true, statusCallback);
+			        }		
+				} else{
+					
+					OnClickListener okButton = new OnClickListener(){
+
+						@Override
+						public void onClick(DialogInterface dialog, int which) {
+							// TODO Auto-generated method stub
+							dialog.cancel();
+						}
+						
+					};
+					
+					showAlertDialogOK(LinguooNewsActivity.this,"Linguoo","Debes instalar Facebook en tu equipo para compartir tus noticias.", okButton);
+				}
 				break;
 			case UI_GOOGLE_SHARE:
 				/*
@@ -479,12 +508,6 @@ public class LinguooNewsActivity extends Activity implements ConnectionListener,
 				public void onCompleted(Response response) {
 					// TODO Auto-generated method stub
 					if(response != null && response.getGraphObject() != null){						
-						JSONObject graphResponse = response.getGraphObject().getInnerJSONObject();
-						String postId = null;
-						try {
-							postId = graphResponse.getString("id");
-						} catch (JSONException e) {
-						}
 						FacebookRequestError error = response.getError();
 						if (error != null) {
 						    Toast.makeText(LinguooNewsActivity.this.getApplicationContext(),"No se ha podido publicar la noticia en tu muro. Intenta más tarde",Toast.LENGTH_SHORT).show();
@@ -506,6 +529,11 @@ public class LinguooNewsActivity extends Activity implements ConnectionListener,
 	    }
 	}	
 	
+	private Boolean isFacebookInstalled(){
+		if(Utils.isPackageInstalled(this, Constants.PKG_FACEBOOK))return true;
+		else return false;
+	}
+	
 	/********************************************************************************************************/
 	
 	public void showAlertDialogYESNO(Context context, String title, String message, OnClickListener negativeButton, OnClickListener positiveButton) {
@@ -521,7 +549,21 @@ public class LinguooNewsActivity extends Activity implements ConnectionListener,
 		
 		AlertDialog alert = builder.create();
 		alert.show();
-	}	
+	}
+	
+	public void showAlertDialogOK(Context context, String title, String message, OnClickListener positiveButton) {
+		final SpannableString s = new SpannableString(message);
+	    Linkify.addLinks(s, Linkify.ALL);
+		AlertDialog.Builder builder = new AlertDialog.Builder(context);
+		builder.setTitle(title)
+		.setIcon(R.drawable.linguoo)
+		.setMessage(s)
+		.setCancelable(false)
+		.setPositiveButton("Volver",positiveButton);
+		
+		AlertDialog alert = builder.create();
+		alert.show();
+	}
 	
 	private class SessionStatusCallback implements Session.StatusCallback {
         @Override
@@ -537,7 +579,5 @@ public class LinguooNewsActivity extends Activity implements ConnectionListener,
                 }
         	}
         }
-    }
-	
-	
+    }	
 }

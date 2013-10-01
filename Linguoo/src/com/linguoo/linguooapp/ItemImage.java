@@ -1,6 +1,5 @@
 package com.linguoo.linguooapp;
 
-import android.R.drawable;
 
 public class ItemImage {
 	public int getId() {
@@ -11,11 +10,11 @@ public class ItemImage {
 		this.id = id;
 	}
 
-	public int getImageView() {
+	public String getImageView() {
 		return imageView;
 	}
 
-	public void setImageView(int imageView) {
+	public void setImageView(String imageView) {
 		this.imageView = imageView;
 	}
 
@@ -36,12 +35,12 @@ public class ItemImage {
 	}
 
 	
-	private int imageView;
+	private String imageView;
 	private int imageSelected;
 	private String textCategoria;
 	private int id;
 	
-	public ItemImage(int imageView, int imageSelected, String textCategoria, int id) {
+	public ItemImage(String imageView, int imageSelected, String textCategoria, int id) {
 		
 		this.imageView = imageView;
 		this.imageSelected = imageSelected;

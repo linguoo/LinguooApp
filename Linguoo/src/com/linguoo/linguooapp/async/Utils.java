@@ -7,7 +7,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
+import android.app.Activity;
 import android.content.Context;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 
@@ -62,5 +65,13 @@ public class Utils {
 	        return android.util.Patterns.EMAIL_ADDRESS.matcher(target).matches();
 	    }
 	}
+    public final static boolean isPackageInstalled(Activity activity,String thepackage){
+        try{
+            ApplicationInfo info = activity.getPackageManager().getApplicationInfo(thepackage, 0 );
+           return true;
+        } catch( PackageManager.NameNotFoundException e ){
+           return false;
+        }
+    }
 
 }

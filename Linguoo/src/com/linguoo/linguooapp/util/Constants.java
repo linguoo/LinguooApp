@@ -61,7 +61,7 @@ public class Constants {
 	public static final int CATEGI = 9;
 	public static final int CATCHG = 10;
 	public static final int CATUCHG = 11;
-
+	public static final int CATFIN = 12;
 	
 	public static final String NEWS_KEY_PREFIX = "news";
 	public static final String NEWS_ID = "LnCod";
@@ -85,4 +85,5 @@ public class Constants {
 	public static final int NEWS_INVISIBLE = 0;
 	public static final int NEWS_VISIBLE = 1;
 	
+	public static final String PKG_FACEBOOK = "com.facebook.katana";
 }
