@@ -1,8 +1,7 @@
 package com.linguoo.linguooapp;
 
 import java.util.Arrays;
-import org.json.JSONException;
-import org.json.JSONObject;
+import com.facebook.AppEventsLogger;
 import com.facebook.FacebookRequestError;
 import com.facebook.HttpMethod;
 import com.facebook.LoggingBehavior;
@@ -32,7 +31,6 @@ import android.content.res.Configuration;
 import android.os.Bundle;
 import android.text.SpannableString;
 import android.text.util.Linkify;
-import android.util.Log;
 import android.widget.Toast;
 
 public class LinguooNewsActivity extends Activity implements ConnectionListener, LinguooUIManagerInterface, LinguooMediaPlayerInterface{
@@ -56,8 +54,6 @@ public class LinguooNewsActivity extends Activity implements ConnectionListener,
         setMainView();
         if(isFacebookInstalled())
         	facebookStart(savedInstanceState);
-
-        
     }
 	
 	
@@ -111,7 +107,6 @@ public class LinguooNewsActivity extends Activity implements ConnectionListener,
         	Session.getActiveSession().onActivityResult(this, requestCode, resultCode, data);
         
 		if (requestCode == Constants.CATEG) {
-			Log.d(TAG, "EL STATUS ES: " + resultCode + " - EL REQUEST ES: " + requestCode);
 			switch(resultCode){
 				case Constants.CATCHG:
 					 /*las categorías han cambiado, detener el reproductor, limpiar el playlist
@@ -138,7 +133,6 @@ public class LinguooNewsActivity extends Activity implements ConnectionListener,
 					 * El usuario presionó el backButton. Finaliza la activity.
 					 * 
 					 */
-					Log.d(TAG,"PRESIONÓ BACKBUTTON");
 					finish();
 					break;
 			}
@@ -373,7 +367,7 @@ public class LinguooNewsActivity extends Activity implements ConnectionListener,
 						
 					};
 					
-					showAlertDialogOK(LinguooNewsActivity.this,"Linguoo","Debes instalar Facebook en tu equipo para compartir tus noticias.", okButton);
+					showAlertDialogOK(LinguooNewsActivity.this,"Linguoo","Debes instalar la última versión de Facebook en tu dispositivo para poder compartir tus noticias.", okButton);
 				}
 				break;
 			case UI_GOOGLE_SHARE:
@@ -465,19 +459,18 @@ public class LinguooNewsActivity extends Activity implements ConnectionListener,
 		// TODO Auto-generated method stub        
         Settings.addLoggingBehavior(LoggingBehavior.INCLUDE_ACCESS_TOKENS);
 		Session session = Session.getActiveSession();
+		
         if (session == null){
             if (savedInstanceState != null){
-                session = Session.restoreSession(this, null, statusCallback, savedInstanceState);
+            	session = Session.restoreSession(this, null, statusCallback, savedInstanceState);
             }
-            if (session == null){
-                session = new Session(this);
-            }
+            session = new Session(this); 
             Session.setActiveSession(session);
-            if (session.getState().equals(SessionState.CREATED_TOKEN_LOADED)){
-                session.openForRead(new Session.OpenRequest(this).setCallback(statusCallback));
+            
+            if (session.getState().equals(SessionState.CREATED_TOKEN_LOADED) || session.getState().equals(SessionState.CREATED)){
+            	session.openForRead(new Session.OpenRequest(this).setCallback(statusCallback));
             }
         }
-        
         /*try {
             PackageInfo info = getPackageManager().getPackageInfo("com.linguoo.linguooapp", PackageManager.GET_SIGNATURES);
             for (Signature signature : info.signatures){
@@ -488,6 +481,7 @@ public class LinguooNewsActivity extends Activity implements ConnectionListener,
         } catch (NameNotFoundException e) {
         } catch (NoSuchAlgorithmException e) {
         }*/
+       
 	}
 	
 	private void publishNewsOnFacebook() {
@@ -500,7 +494,7 @@ public class LinguooNewsActivity extends Activity implements ConnectionListener,
 	        postParams.putString("name", newsTitle);
 	        postParams.putString("caption", newsTitle);
 	        postParams.putString("description", newsTitle);
-	        postParams.putString("link", "http://www.linguoo.com.ar");
+	        postParams.putString("link", "http://www.linguoo.com");
 	        postParams.putString("picture", newsImage);
 
 	        Request.Callback callback= new Request.Callback() {
@@ -530,8 +524,15 @@ public class LinguooNewsActivity extends Activity implements ConnectionListener,
 	}	
 	
 	private Boolean isFacebookInstalled(){
-		if(Utils.isPackageInstalled(this, Constants.PKG_FACEBOOK))return true;
-		else return false;
+		try{
+			if(Settings.getAttributionId(getContentResolver()) != null){
+		       	if(Utils.isPackageInstalled(this, Constants.PKG_FACEBOOK)){
+		       		AppEventsLogger.activateApp(this);
+		       		return true;
+		       	}
+		    }
+		}catch (IllegalStateException e){}
+		return false;
 	}
 	
 	/********************************************************************************************************/
