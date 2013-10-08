@@ -65,7 +65,7 @@ public class GridActivity extends Activity implements ConnectionListener{
 	private String seleccionadas;
 	private ProgressBar pb;
 	ImageAdapterGrid ia;
-	
+	private boolean connected=true;
 	
 	
 	@Override
@@ -181,6 +181,9 @@ public class GridActivity extends Activity implements ConnectionListener{
 		.setPositiveButton("Ok",new DialogInterface.OnClickListener() {
 			public void onClick(DialogInterface dialog, int id) {
 				dialog.cancel();
+				if(connected==false){
+					finish();
+				}
 			}
 		});
 		AlertDialog alert = builder.create();
@@ -268,7 +271,7 @@ public class GridActivity extends Activity implements ConnectionListener{
 			}
 				
 				dibujar_grilla();
-			
+				connected=true;
 			break;
 		case Constants.CATEGI:
 			
@@ -284,8 +287,9 @@ public class GridActivity extends Activity implements ConnectionListener{
 			/*
 			 * Dialogo error de conexion volver a intentar
 			 */
+			connected=false;
 			showAlertDialog(GridActivity.this, "Ha ocurrido un Error", "Por favor, intentelo mas tarde");
-			finish();
+			
 			break;
 		}
 	}
