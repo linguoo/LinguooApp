@@ -192,29 +192,7 @@ public class GridActivity extends Activity implements ConnectionListener{
 		
 	
 
-	public String selectImaginItem(int id)
-	{
-		switch(id){
-		case 1:
-			return "http://2.bp.blogspot.com/-DGhEucdOWNQ/UVdlc67ID9I/AAAAAAAAAAY/YsHzAiSCy9o/s1600/Amor-tecnol%25C3%25B3gico.jpg";
-		case 2:
-			return "http://2.bp.blogspot.com/-DGhEucdOWNQ/UVdlc67ID9I/AAAAAAAAAAY/YsHzAiSCy9o/s1600/Amor-tecnol%25C3%25B3gico.jpg";
-		case 3:
-			return "http://2.bp.blogspot.com/-DGhEucdOWNQ/UVdlc67ID9I/AAAAAAAAAAY/YsHzAiSCy9o/s1600/Amor-tecnol%25C3%25B3gico.jpg";
-			
-		case 4:
-			return "http://2.bp.blogspot.com/-DGhEucdOWNQ/UVdlc67ID9I/AAAAAAAAAAY/YsHzAiSCy9o/s1600/Amor-tecnol%25C3%25B3gico.jpg";
-			
-		case 5:
-			return "http://2.bp.blogspot.com/-DGhEucdOWNQ/UVdlc67ID9I/AAAAAAAAAAY/YsHzAiSCy9o/s1600/Amor-tecnol%25C3%25B3gico.jpg";
-		case 6:
-			return "http://2.bp.blogspot.com/-DGhEucdOWNQ/UVdlc67ID9I/AAAAAAAAAAY/YsHzAiSCy9o/s1600/Amor-tecnol%25C3%25B3gico.jpg";
-		case 8:
-			return "http://ec2-54-232-205-219.sa-east-1.compute.amazonaws.com/linguoo/PublicTempStorage/multimedia/men_yoga_80d84a4035dc446cb2b0f647a5bf0e34.jpg";
-		default:
-			return "http://ec2-54-232-205-219.sa-east-1.compute.amazonaws.com/linguoo/PublicTempStorage/multimedia/CLP-brain-vector-shutter-stock_bac71bc38d784a0d9e0336dbb5fce1f6.jpg";
-		}
-	}
+	
 	
 	public boolean checkearSeleccion()
 	{
