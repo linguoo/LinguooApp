@@ -1,4 +1,4 @@
-package com.mkiisoft.linguoo.util;
+package com.linguoo.linguooapp.util;
 
 import android.content.Context;
 import android.graphics.Point;

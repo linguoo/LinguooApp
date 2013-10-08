@@ -1,4 +1,4 @@
-package com.mkiisoft.linguoo.util;
+package com.linguoo.linguooapp.util;
 
 import android.app.Activity;
 import android.content.Context;

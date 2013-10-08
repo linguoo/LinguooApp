@@ -1,6 +1,7 @@
-package com.mkiisoft.linguoo;
+package com.linguoo.linguooapp;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -10,13 +11,13 @@ import java.util.ArrayList;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import com.linguoo.linguooapp.async.AsyncConnection;
+import com.linguoo.linguooapp.async.Commons;
+import com.linguoo.linguooapp.async.ConnectionListener;
+import com.linguoo.linguooapp.util.Constants;
+import com.linguoo.linguooapp.util.KeySaver;
+import com.mkiisoft.linguoo.R;
 import com.mkiisoft.linguoo.R.array;
-import com.mkiisoft.linguoo.async.AsyncConnection;
-import com.mkiisoft.linguoo.async.Commons;
-import com.mkiisoft.linguoo.async.ConnectionListener;
-import com.mkiisoft.linguoo.util.Constants;
-import com.mkiisoft.linguoo.util.KeySaver;
-
 import android.R.bool;
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -33,6 +34,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.CheckBox;
@@ -50,8 +52,10 @@ public class GridActivity extends Activity implements ConnectionListener{
 	public void onConfigurationChanged(Configuration newConfig) {
 	
 		super.onConfigurationChanged(newConfig);
+		gv.setAdapter(ia);
+		refreshGrid(0);
 	}
-
+	private final String TAG="Linguoo Categories";
 	private GridView gv;
 	private String usuLog="";
 	private int firstTime=0;
@@ -62,133 +66,108 @@ public class GridActivity extends Activity implements ConnectionListener{
 	private ProgressBar pb;
 	ImageAdapterGrid ia;
 	
+	
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 	
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.catchioce_layout);
 		pb= (ProgressBar)findViewById(R.id.progress_bar);
-		pb.setVisibility(pb.VISIBLE);
+		pb.setVisibility(View.VISIBLE);
 		usuLog= KeySaver.getStringSavedShare(this, "UsuLog");
 				
 		firstTime=KeySaver.getIntSavedShare(this, "FirstTime");
+
+		
 		gv= (GridView) findViewById(R.id.gird_cat);
 		img_back=(ImageView) this.findViewById(R.id.btn_back_grid);
 		String page = Constants.WSGETCAT+usuLog+",Q";
 		arrayCategoria=new ArrayList<ItemImage>();
 		AsyncConnection.getInstance(page, this, Constants.CATEGQ).execute();
-	
-
 		
-		
+		setListeners();
 	}
 	
-	private void dibujar_grilla(){
-		if(firstTime==1)
-		{
+	private void setListeners() {
+		gv.setOnItemClickListener(new OnItemClickListener() {
+
+			@Override
+			public void onItemClick(AdapterView<?> av, View v, int position,
+					long arg3) {
+
+
+				lastPosition=gv.getPositionForView(v);
+				if(arrayCategoria.get(position).getImageSelected()==0){
+					arrayCategoria.get(position).setImageSelected(1);
+				}else{
+					arrayCategoria.get(position).setImageSelected(0);
+				}
+				
+				if(checkearSeleccion()==true){
+					img_back.setVisibility(View.VISIBLE);
+				}else{
+					img_back.setVisibility(View.INVISIBLE);
+				}
+				refreshGrid(lastPosition);
+			}
+		});
+		
+		img_back.setOnClickListener(new OnClickListener() {
 			
+			@Override
+			public void onClick(View v) {
+				String categorias="";
+			for(int i=0; i<arrayCategoria.size(); i++){
+				if(arrayCategoria.get(i).getImageSelected()==1){
+					categorias+=arrayCategoria.get(i).getId();
+				}
+				
+			}
+			
+			if(!seleccionadas.equals(categorias)){
+				
+				String page=Constants.WSGETCAT+usuLog+",I,"+categorias;
+				pb.setVisibility(View.VISIBLE);
+				AsyncConnection.getInstance(page, GridActivity.this, Constants.CATEGI).execute();
+			}else{
+				
+				//Intent in=new Intent(GridActivity.this, LinguooNewsActivity.class);
+				//startActivity(in);
+			}
+				
+			}
+		});
+	}
+
+
+	private void dibujar_grilla(){
+		if(firstTime==1){
 			showAlertDialog(GridActivity.this, "Bienvenido!!", "Elija al menos una categoria que sea de su interes."); 
 			img_back.setBackgroundResource(R.drawable.icon_next);
-	
 			KeySaver.saveShare(this, "FirstTime", 0);
-		}
-		else
-		{
-			
+		}else{
 			img_back.setBackgroundResource(R.drawable.icon_back);
 		}
-		
-		if(checkearSeleccion()==true)
-		{
+		if(checkearSeleccion()==true){
 			img_back.setVisibility(View.VISIBLE);
-		}
-		else{
+		}else{
 			img_back.setVisibility(View.INVISIBLE);
 		}
-
-
-		
-		
 		ia= new ImageAdapterGrid(this, arrayCategoria, R.layout.cat_item_grid);
 		gv.setAdapter(ia);
-		refreshGrid();
-
-
-
-
-		
-	
-	
-	gv.setOnItemClickListener(new OnItemClickListener() {
-
-		@Override
-		public void onItemClick(AdapterView<?> arg0, View arg1, int arg2,
-				long arg3) {
-
-			lastPosition= arg2;
-			if(arrayCategoria.get(arg2).getImageSelected()==0)
-			{
-				arrayCategoria.get(arg2).setImageSelected(1);
-
-			}
-			else
-			{
-				arrayCategoria.get(arg2).setImageSelected(0);
-			}
-			if(checkearSeleccion()==true)
-			{
-				img_back.setVisibility(View.VISIBLE);
-			}
-			else{
-				img_back.setVisibility(View.INVISIBLE);
-			}
-			refreshGrid();
-		}
-	});
-	
-	img_back.setOnClickListener(new OnClickListener() {
-		
-		@Override
-		public void onClick(View v) {
-			String categorias="";
-		for(int i=0; i<arrayCategoria.size(); i++){
-			if(arrayCategoria.get(i).getImageSelected()==1){
-				categorias+=arrayCategoria.get(i).getId();
-			}
-			
-		}
-		
-		if(!seleccionadas.equals(categorias)){
-			
-			String page=Constants.WSGETCAT+usuLog+",I,"+categorias;
-			pb.setVisibility(pb.VISIBLE);
-			AsyncConnection.getInstance(page, GridActivity.this, Constants.CATEGI).execute();
-		}else{
-			
-			Intent in=new Intent(GridActivity.this, LinguooNewsActivity.class);
-			startActivity(in);
-		}
-			
-		}
-	});
 	}
 	
-	
-	
-	
-	
-	private void refreshGrid(){
-		//setBotones();
-		if(gv.getAdapter()!=null){
-			//gv.invalidateViews();}
-		}
-		//reloadAdapter();
-		//mAdapter.notifyDataSetChanged();
-		gv.setAdapter(ia);
-		gv.setSelection(lastPosition);
+	private void refreshGrid(int pos){
 		
-		
+		//int firstVPosition = gv.getFirstVisiblePosition();
+//		int lastVPosition = gv.getLastVisiblePosition();
+		gv.setSelection(pos);
 		ia.notifyDataSetChanged();
+		//gv.setAdapter(ia);
+		gv.invalidate();
+	//	if (lastPosition<(lastVPosition-1))gv.setSelection(firstVPosition);
+		//else gv.setSelection(firstVPosition+2);
 	}
 	
 	public void showAlertDialog(Context context, String title, String message) {
@@ -204,62 +183,52 @@ public class GridActivity extends Activity implements ConnectionListener{
 				dialog.cancel();
 			}
 		});
-		
 		AlertDialog alert = builder.create();
 		alert.show();
 	}
 		
 	
 
-	public int selectImaginItem(int id)
+	public String selectImaginItem(int id)
 	{
 		switch(id){
 		case 1:
-			return R.drawable.ciencia_256;
+			return "http://2.bp.blogspot.com/-DGhEucdOWNQ/UVdlc67ID9I/AAAAAAAAAAY/YsHzAiSCy9o/s1600/Amor-tecnol%25C3%25B3gico.jpg";
 		case 2:
-			return R.drawable.actualidad_256;
+			return "http://2.bp.blogspot.com/-DGhEucdOWNQ/UVdlc67ID9I/AAAAAAAAAAY/YsHzAiSCy9o/s1600/Amor-tecnol%25C3%25B3gico.jpg";
 		case 3:
-			return R.drawable.entretenimientos_128;
+			return "http://2.bp.blogspot.com/-DGhEucdOWNQ/UVdlc67ID9I/AAAAAAAAAAY/YsHzAiSCy9o/s1600/Amor-tecnol%25C3%25B3gico.jpg";
 			
 		case 4:
-			return R.drawable.deportes_256;
+			return "http://2.bp.blogspot.com/-DGhEucdOWNQ/UVdlc67ID9I/AAAAAAAAAAY/YsHzAiSCy9o/s1600/Amor-tecnol%25C3%25B3gico.jpg";
 			
 		case 5:
-			return R.drawable.cultura_256;
+			return "http://2.bp.blogspot.com/-DGhEucdOWNQ/UVdlc67ID9I/AAAAAAAAAAY/YsHzAiSCy9o/s1600/Amor-tecnol%25C3%25B3gico.jpg";
 		case 6:
-			return R.drawable.negocios_256;
+			return "http://2.bp.blogspot.com/-DGhEucdOWNQ/UVdlc67ID9I/AAAAAAAAAAY/YsHzAiSCy9o/s1600/Amor-tecnol%25C3%25B3gico.jpg";
 		case 8:
-			return R.drawable.vida_256;
+			return "http://ec2-54-232-205-219.sa-east-1.compute.amazonaws.com/linguoo/PublicTempStorage/multimedia/men_yoga_80d84a4035dc446cb2b0f647a5bf0e34.jpg";
 		default:
-			return R.drawable.vida_256;
-
+			return "http://ec2-54-232-205-219.sa-east-1.compute.amazonaws.com/linguoo/PublicTempStorage/multimedia/CLP-brain-vector-shutter-stock_bac71bc38d784a0d9e0336dbb5fce1f6.jpg";
 		}
-
-
 	}
+	
 	public boolean checkearSeleccion()
 	{
 		int selectedCat=0;
-		for( ItemImage i: arrayCategoria)
-		{
-			
+		for( ItemImage i: arrayCategoria){
 			selectedCat= selectedCat + i.getImageSelected();
-			
 		}
-		if(selectedCat==0)
-		{
+		if(selectedCat==0){
 			return false;
-		}
-		else
-		{
+		}else{
 			return true;
 		}
-		
 	}
 
 	@Override
 	public void ready(int msg, String message) {
-		
+		pb.setVisibility(View.GONE);
 		switch (msg){
 		case Constants.CATEGQ:
 			/*
@@ -274,21 +243,22 @@ public class GridActivity extends Activity implements ConnectionListener{
 				
 				for(int i=0; i<categorias.length(); i++)
 				{
-					
-					
+					JSONObject object=categorias.getJSONObject(i);
+					String cat=object.getString("CatdesLN");
+					Log.v("object", cat);
 					
 					if(seleccionadas.length()>0 && String.valueOf(seleccionadas.charAt(j)).equals(categorias.getJSONObject(i).getString("CatLN"))){
 						selected=1;
 						j++;
 						if (j==seleccionadas.length()) j=seleccionadas.length()-1;
-					
 					}
-					ItemImage im=new ItemImage(selectImaginItem(Integer.valueOf(categorias.getJSONObject(i).getString("CatLN"))), selected, 
-							categorias.getJSONObject(i).getString("CatdesLN"), 
-							Integer.valueOf(categorias.getJSONObject(i).getString("CatLN")));
-					
+					ItemImage im=new ItemImage(object.getString("CatfotLN_GXI"), selected, 
+							cat, 
+							Integer.valueOf(object.getString("CatLN")));
+					Log.v("item", "imagen: "+im.getImageView()+"selected: "+ im.getImageSelected() 
+							+"categoria: "+im.getTextCategoria() 
+							+"id: "+im.getId());
 					arrayCategoria.add(im);
-					
 					selected=0;
 				}
 				
@@ -296,18 +266,18 @@ public class GridActivity extends Activity implements ConnectionListener{
 				
 				e.getMessage();
 			}
-				pb.setVisibility(pb.INVISIBLE);
+				
 				dibujar_grilla();
-				refreshGrid();
 			
 			break;
 		case Constants.CATEGI:
+			
 			/*
 			 * Llamar al intent para pasar a noticias
 			 */
 			
-			Intent in=new Intent(GridActivity.this, LinguooNewsActivity.class);
-			startActivity(in);
+			//Intent in=new Intent(GridActivity.this, LinguooNewsActivity.class);
+			//startActivity(in);
 		break;
 		case AsyncConnection.ERROR:
 		case AsyncConnection.NOCONNECTION:
@@ -315,25 +285,12 @@ public class GridActivity extends Activity implements ConnectionListener{
 			 * Dialogo error de conexion volver a intentar
 			 */
 			showAlertDialog(GridActivity.this, "Ha ocurrido un Error", "Por favor, intentelo mas tarde");
+			finish();
 			break;
 		}
-
-
 	}
 
 	@Override
 	public void cacheReady(int msg, String message) {
-	
-
 	}
-
-
-
-
-
-
-
-
-
-
 }

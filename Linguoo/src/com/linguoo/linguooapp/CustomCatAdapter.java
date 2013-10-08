@@ -1,4 +1,4 @@
-package com.mkiisoft.linguoo;
+package com.linguoo.linguooapp;
 
 import java.util.ArrayList;
 

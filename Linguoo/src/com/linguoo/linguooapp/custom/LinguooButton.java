@@ -1,4 +1,4 @@
-package com.mkiisoft.linguoo.custom;
+package com.linguoo.linguooapp.custom;
 
 import android.content.Context;
 import android.graphics.Typeface;

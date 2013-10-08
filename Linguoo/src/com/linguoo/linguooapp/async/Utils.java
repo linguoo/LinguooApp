@@ -1,4 +1,4 @@
-package com.mkiisoft.linguoo.async;
+package com.linguoo.linguooapp.async;
 
 import java.io.File;
 import java.io.FileInputStream;

@@ -5,4 +5,4 @@
  * @author victor
  *
  */
-package com.mkiisoft.linguoo.async;
+package com.linguoo.linguooapp.custom;

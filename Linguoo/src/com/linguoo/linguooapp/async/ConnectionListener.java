@@ -1,4 +1,4 @@
-package com.mkiisoft.linguoo.async;
+package com.linguoo.linguooapp.async;
 
 
 public interface ConnectionListener {
